@@ -5,8 +5,11 @@
 
 document.addEventListener('DOMContentLoaded', () => {
   initHeroSlider();
-  initEventCarousel();
   initHeader();
+  initMerchantSection();
+  initHowTabs();
+  initEventTabs();
+  initHelpSearch();
 });
 
 /* --------------------------------------------------------------------------
@@ -53,54 +56,145 @@ function handleHeroSlideChange(track, nextIndex) {
 }
 
 /* --------------------------------------------------------------------------
-   3. Merchant Selection & Map Interactivity
+   3. Merchant Finder (Figma: shop, node 1:185)
    -------------------------------------------------------------------------- */
-function selectMerchant(element, name, lat, lng) {
-  // Update active state in merchant list
-  const allItems = document.querySelectorAll('.merchant-item');
-  allItems.forEach(item => item.classList.remove('active'));
-  element.classList.add('active');
+const REGION_GUGUN_MAP = {
+  seoul: ['강남구', '서초구', '마포구'],
+  gyeonggi: ['수원시', '성남시', '고양시'],
+  busan: ['해운대구', '수영구', '동래구'],
+};
 
-  // Highlight map markers
-  const markers = document.querySelectorAll('.map-marker');
-  markers.forEach(m => m.classList.remove('active'));
+function initMerchantSection() {
+  initMerchantCategories();
+  initMerchantRegionSelect();
+  initMerchantMapButtons();
+}
 
-  if (name.includes('메가박스')) {
-    document.querySelector('.marker-1')?.classList.add('active');
-  } else if (name.includes('영풍문고')) {
-    document.querySelector('.marker-2')?.classList.add('active');
-  } else if (name.includes('알파')) {
-    document.querySelector('.marker-3')?.classList.add('active');
+function initMerchantCategories() {
+  const buttons = document.querySelectorAll('.merchant_category_btn');
+  buttons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      buttons.forEach((b) => b.classList.remove('is_active'));
+      btn.classList.add('is_active');
+    });
+  });
+}
+
+function initMerchantRegionSelect() {
+  const sidoSelect = document.getElementById('region_sido_select');
+  const gugunSelect = document.getElementById('region_gugun_select');
+  const searchBtn = document.getElementById('merchant_search_btn');
+  if (!sidoSelect || !gugunSelect || !searchBtn) return;
+
+  sidoSelect.addEventListener('change', () => {
+    const gugunList = REGION_GUGUN_MAP[sidoSelect.value] || [];
+    gugunSelect.innerHTML = '<option value="">구/군 선택</option>';
+    gugunList.forEach((gugun) => {
+      const option = document.createElement('option');
+      option.value = gugun;
+      option.textContent = gugun;
+      gugunSelect.appendChild(option);
+    });
+    gugunSelect.disabled = gugunList.length === 0;
+    gugunSelect.value = '';
+    searchBtn.disabled = true;
+  });
+
+  gugunSelect.addEventListener('change', () => {
+    searchBtn.disabled = gugunSelect.value === '';
+  });
+}
+
+function initMerchantMapButtons() {
+  const locationBtn = document.getElementById('merchant_map_location_btn');
+  const changeBtn = document.getElementById('merchant_map_change_btn');
+
+  if (locationBtn) {
+    locationBtn.addEventListener('click', () => {
+      showModal('위치 재설정', '현재 위치가 [서울시 강남구] 기준으로 업데이트 되었습니다.');
+    });
   }
 
-  // Smooth visual feedback on map
-  const mapBg = document.getElementById('mapBgImg');
-  if (mapBg) {
-    mapBg.style.transform = 'scale(1.05)';
-    setTimeout(() => {
-      mapBg.style.transform = 'scale(1)';
-    }, 300);
+  if (changeBtn) {
+    changeBtn.addEventListener('click', () => {
+      showModal('지역 변경', '주변 가맹점을 찾고자 하는 동/구 이름을 검색하여 변경할 수 있습니다.');
+    });
   }
 }
 
-let mapScale = 1;
-function zoomMap(factor) {
-  mapScale *= factor;
-  if (mapScale < 0.8) mapScale = 0.8;
-  if (mapScale > 1.5) mapScale = 1.5;
-  const mapBg = document.getElementById('mapBgImg');
-  if (mapBg) {
-    mapBg.style.transform = `scale(${mapScale})`;
+/* --------------------------------------------------------------------------
+   3-1. Card Application Tabs (Figma: how, node 1:323)
+   -------------------------------------------------------------------------- */
+function initHowTabs() {
+  const tabButtons = document.querySelectorAll('.how_tab_btn');
+  const panels = document.querySelectorAll('.how_panel');
+  if (!tabButtons.length) return;
+
+  tabButtons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      tabButtons.forEach((b) => {
+        b.classList.remove('is_active');
+        b.setAttribute('aria-selected', 'false');
+      });
+      btn.classList.add('is_active');
+      btn.setAttribute('aria-selected', 'true');
+
+      panels.forEach((panel) => {
+        panel.hidden = panel.dataset.panel !== btn.dataset.tab;
+        panel.classList.toggle('is_active', panel.dataset.panel === btn.dataset.tab);
+      });
+    });
+  });
+}
+
+/* --------------------------------------------------------------------------
+   3-2. News/Events Tabs (Figma: event, node 1:345)
+   -------------------------------------------------------------------------- */
+function initEventTabs() {
+  const tabButtons = document.querySelectorAll('.event_tab_btn');
+  const list = document.querySelector('.event_list');
+  const emptyTxt = document.querySelector('.event_empty_txt');
+  if (!tabButtons.length) return;
+
+  tabButtons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      tabButtons.forEach((b) => {
+        b.classList.remove('is_active');
+        b.setAttribute('aria-selected', 'false');
+      });
+      btn.classList.add('is_active');
+      btn.setAttribute('aria-selected', 'true');
+
+      const isEventTab = btn.dataset.eventTab === 'event';
+      if (list) list.hidden = !isEventTab;
+      if (emptyTxt) emptyTxt.hidden = isEventTab;
+    });
+  });
+}
+
+/* --------------------------------------------------------------------------
+   3-3. FAQ Search (Figma: help, node 1:426)
+   -------------------------------------------------------------------------- */
+function initHelpSearch() {
+  const form = document.getElementById('help_search_form');
+  const input = document.getElementById('help_search_input');
+  const chips = document.querySelectorAll('.help_chip');
+
+  if (form && input) {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (input.value.trim() === '') return;
+      askChatbot(input.value.trim());
+      input.value = '';
+    });
   }
-}
 
-function resetUserLocation() {
-  document.getElementById('currentLocationText').textContent = '서울시 강남구';
-  showModal('위치 재설정', '현재 위치가 [서울시 강남구] 기준으로 업데이트 되었습니다.');
-}
-
-function openLocationChangeModal() {
-  showModal('지역 변경', '주변 가맹점을 찾고자 하는 동/구 이름을 검색하여 변경할 수 있습니다.');
+  chips.forEach((chip) => {
+    chip.addEventListener('click', () => {
+      chips.forEach((c) => c.classList.remove('is_active'));
+      chip.classList.add('is_active');
+    });
+  });
 }
 
 /* --------------------------------------------------------------------------
@@ -140,93 +234,19 @@ function handleHeaderToggleClick(toggleEl) {
 }
 
 /* --------------------------------------------------------------------------
-   5. Event Carousel
-   -------------------------------------------------------------------------- */
-let currentEventIndex = 0;
-
-function initEventCarousel() {
-  const track = document.getElementById('eventTrack');
-  const prevBtn = document.getElementById('eventPrevBtn');
-  const nextBtn = document.getElementById('eventNextBtn');
-  const dots = document.querySelectorAll('#eventDots .dot');
-
-  if (!track) return;
-
-  function updateCarousel() {
-    const cardWidth = track.querySelector('.event-card').offsetWidth + 24; // width + gap
-    track.style.transform = `translateX(-${currentEventIndex * cardWidth}px)`;
-
-    dots.forEach((dot, idx) => {
-      if (idx === currentEventIndex) {
-        dot.classList.add('active');
-      } else {
-        dot.classList.remove('active');
-      }
-    });
-  }
-
-  if (nextBtn) {
-    nextBtn.addEventListener('click', () => {
-      if (currentEventIndex < 2) {
-        currentEventIndex++;
-      } else {
-        currentEventIndex = 0;
-      }
-      updateCarousel();
-    });
-  }
-
-  if (prevBtn) {
-    prevBtn.addEventListener('click', () => {
-      if (currentEventIndex > 0) {
-        currentEventIndex--;
-      } else {
-        currentEventIndex = 2;
-      }
-      updateCarousel();
-    });
-  }
-
-  dots.forEach((dot, index) => {
-    dot.addEventListener('click', () => {
-      currentEventIndex = index;
-      updateCarousel();
-    });
-  });
-}
-
-/* --------------------------------------------------------------------------
-   6. FAQ Accordion Toggle
-   -------------------------------------------------------------------------- */
-function toggleFaq(buttonEl) {
-  const faqItem = buttonEl.closest('.faq-item');
-  const isOpen = faqItem.classList.contains('open');
-
-  // Close all other items
-  document.querySelectorAll('.faq-item').forEach(item => {
-    item.classList.remove('open');
-    const stateText = item.querySelector('.faq-toggle-state');
-    if (stateText) {
-      stateText.innerHTML = '열기 <span class="material-symbols-outlined arrow-icon">expand_more</span>';
-    }
-  });
-
-  if (!isOpen) {
-    faqItem.classList.add('open');
-    const stateText = buttonEl.querySelector('.faq-toggle-state');
-    if (stateText) {
-      stateText.innerHTML = '닫기 <span class="material-symbols-outlined arrow-icon">expand_more</span>';
-    }
-  }
-}
-
-/* --------------------------------------------------------------------------
-   7. Chatbot Modal & Messaging
+   5. Chatbot Modal & Messaging
    -------------------------------------------------------------------------- */
 function toggleChatbotModal() {
   const modal = document.getElementById('chatbotModal');
   if (modal) {
     modal.classList.toggle('open');
+  }
+}
+
+function openChatbotModal() {
+  const modal = document.getElementById('chatbotModal');
+  if (modal) {
+    modal.classList.add('open');
   }
 }
 
@@ -240,6 +260,8 @@ function handleChatSubmit(e) {
 function askChatbot(questionText) {
   const chatMessages = document.getElementById('chatMessages');
   if (!chatMessages) return;
+
+  openChatbotModal();
 
   // Add User Message
   const userBubble = document.createElement('div');
