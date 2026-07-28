@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Editor / IDE
+.vscode/
+.idea/
+
+# Claude Code local settings (machine-specific, may contain local paths)
+.claude/
+
+# Secrets / local config (contains credential placeholders)
+mcp_config.json
+.env
+.env.local
+
+# OS junk files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor swap files
+*.swp
+*.swo
+
+# Logs
+*.log

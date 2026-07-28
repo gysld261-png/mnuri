@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>문화누리카드 - 문화예술, 여행, 체육 활동 지원</title>
+  <!-- Google Material Symbols (Pretendard Variable은 style.css에서 로드) -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Header (Figma: Component 4, off/on 2 states) -->
+  <header class="header" id="site_header">
+    <div class="header_inner">
+      <a href="#" class="header_logo">
+        <img src="./asset/logo1.png" alt="" class="header_logo_icon">
+        <span class="header_logo_txt">문화누리카드</span>
+      </a>
+
+      <nav class="header_nav" aria-label="주요 메뉴">
+        <a href="#" class="header_nav_item">문화누리카드</a>
+        <a href="#" class="header_nav_item">카드관리/잔액</a>
+        <a href="#merchant-section" class="header_nav_item">사용처 찾기</a>
+        <a href="#" class="header_nav_item">소식/공지사항</a>
+      </nav>
+
+      <div class="header_right">
+        <div class="header_toggles">
+          <button type="button" class="header_toggle" id="large_text_toggle" aria-pressed="false">
+            <span class="header_toggle_track"><span class="header_toggle_thumb"></span></span>
+            <span class="header_toggle_label">큰글씨 모드</span>
+          </button>
+          <button type="button" class="header_toggle" id="merchant_mode_toggle" aria-pressed="false">
+            <span class="header_toggle_track"><span class="header_toggle_thumb"></span></span>
+            <span class="header_toggle_label">가맹주 모드</span>
+          </button>
+        </div>
+
+        <button type="button" class="header_ham_btn" id="header_ham_btn" aria-label="전체메뉴 열기" aria-expanded="false" aria-controls="header_menu_panel">
+          <span class="header_ham_line"></span>
+          <span class="header_ham_line"></span>
+          <span class="header_ham_line"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Figma: 속성1=on (전체메뉴 오버레이) -->
+    <div class="header_menu_panel" id="header_menu_panel" hidden>
+      <div class="header_menu_top">
+        <a href="#" class="header_logo">
+          <img src="./asset/logo1.png" alt="" class="header_logo_icon">
+          <span class="header_logo_txt header_logo_txt_dark">문화누리카드</span>
+        </a>
+        <button type="button" class="header_menu_close" id="header_menu_close_btn" aria-label="전체메뉴 닫기">
+          <img src="./icon/close_40dp_1F1F1F_FILL0_wght400_GRAD0_opsz40.svg" alt="" class="header_menu_close_icon">
+        </button>
+      </div>
+
+      <h2 class="header_menu_tit">전체메뉴</h2>
+
+      <div class="header_menu_grid">
+        <div class="header_menu_group">
+          <p class="header_menu_group_tit">문화누리카드</p>
+          <ul class="header_menu_group_list">
+            <li><a href="#">문화누리카드 소개</a></li>
+            <li><a href="#">2026 카드 발급 안내</a></li>
+            <li><a href="#">지역주관처 안내</a></li>
+            <li><a href="#">복권기금 문화나눔</a></li>
+          </ul>
+        </div>
+        <div class="header_menu_group">
+          <p class="header_menu_group_tit">카드관리/잔액</p>
+          <ul class="header_menu_group_list">
+            <li><a href="#">카드발급 / 재충전</a></li>
+            <li><a href="#">잔액 / 이용내역</a></li>
+            <li><a href="#">내 정보 관리</a></li>
+          </ul>
+        </div>
+        <div class="header_menu_group">
+          <p class="header_menu_group_tit">사용처 찾기</p>
+          <ul class="header_menu_group_list">
+            <li><a href="#merchant-section">가맹점 찾기</a></li>
+            <li><a href="#">사용 방법 안내</a></li>
+            <li><a href="#">나눔티켓</a></li>
+            <li><a href="#">찾아가는 문화서비스</a></li>
+          </ul>
+        </div>
+        <div class="header_menu_group">
+          <p class="header_menu_group_tit">소식/공지사항</p>
+          <ul class="header_menu_group_list">
+            <li><a href="#">공지사항</a></li>
+            <li><a href="#">블로그 / 이벤트</a></li>
+            <li><a href="#">FAQ / Q&amp;A</a></li>
+            <li><a href="#">상담 이용안내</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-content">
+
+    <!-- Hero Banner Section (Figma: main_hero, 3 slides) -->
+    <section class="hero_section" aria-label="주요 소식 배너">
+      <div class="hero_slider">
+        <div class="hero_track" id="hero_track">
+          <div class="hero_slide is_active" data-slide-index="0">
+            <img src="./asset/hero1.jpg" alt="" class="hero_slide_bg">
+            <div class="hero_slide_overlay" aria-hidden="true"></div>
+            <div class="hero_slide_inner">
+              <div class="hero_slide_txt">
+                <p class="hero_slide_sub">지원금은 기간이 지나면 사라져요</p>
+                <p class="hero_slide_tit"><span class="hero_slide_tit_shift">올해 </span><strong>문화생활</strong><span class="hero_slide_tit_shift">,</span> 놓치지 마세요.</p>
+              </div>
+              <a href="#" class="hero_more_link">
+                자세히 보러가기
+                <img src="./asset/arrow.svg" alt="" class="hero_more_icon">
+              </a>
+            </div>
+          </div>
+          <div class="hero_slide" data-slide-index="1">
+            <img src="./asset/hero2.jpg" alt="" class="hero_slide_bg">
+            <div class="hero_slide_overlay" aria-hidden="true"></div>
+            <div class="hero_slide_inner">
+              <div class="hero_slide_txt">
+                <p class="hero_slide_sub">어디서 쓸 수 있는지 헷갈리셨다면?</p>
+                <p class="hero_slide_tit"><strong>우리 동네 가맹점,</strong> 지도로 한눈에!</p>
+              </div>
+              <a href="#merchant-section" class="hero_more_link">
+                내 주변 사용처 찾기
+                <img src="./asset/arrow.svg" alt="" class="hero_more_icon">
+              </a>
+            </div>
+          </div>
+          <div class="hero_slide" data-slide-index="2">
+            <img src="./asset/hero3.jpg" alt="" class="hero_slide_bg">
+            <div class="hero_slide_overlay" aria-hidden="true"></div>
+            <div class="hero_slide_inner">
+              <div class="hero_slide_txt">
+                <p class="hero_slide_sub">문화생활 인증하고 넘치는 혜택까지</p>
+                <p class="hero_slide_tit"><strong>지금 진행 중인 이벤트를 확인해보세요!</strong></p>
+              </div>
+              <a href="#" class="hero_more_link">
+                이벤트 보러가기
+                <img src="./asset/arrow.svg" alt="" class="hero_more_icon">
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero_pager">
+          <button type="button" class="hero_pager_btn" id="hero_prev_btn" aria-label="이전 배너 보기">
+            <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <p class="hero_pager_count"><strong id="hero_current_num">01</strong><span> / 03</span></p>
+          <button type="button" class="hero_pager_btn" id="hero_next_btn" aria-label="다음 배너 보기">
+            <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Figma: login (잔액확인 카드) -->
+      <div class="balance_card" id="balance-section">
+        <div class="balance_card_txt">
+          <p class="balance_card_sub">간편인증 한 번이면 끝!</p>
+          <p class="balance_card_tit">지금 바로<br>잔액을 확인해보세요!</p>
+        </div>
+        <div class="balance_card_actions">
+          <button type="button" class="balance_card_cta" onclick="openAuthModal('login')">간편인증하고 잔액 확인</button>
+          <div class="balance_card_links">
+            <a href="#" onclick="openAuthModal('login')">로그인</a>
+            <span class="balance_card_divider" aria-hidden="true"></span>
+            <a href="#" onclick="openAuthModal('signup')">회원가입</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quick Services Section: 무엇을 도와드릴까요? -->
+    <section class="services-section" id="guide-section">
+      <h2 class="section-title">무엇을 도와드릴까요?</h2>
+      
+      <div class="services-grid">
+        <!-- Service 1: 카드 신청하기 -->
+        <div class="service-card blue-card">
+          <div class="service-info">
+            <h3 class="service-title">카드 신청하기</h3>
+            <p class="service-desc">신규부터 재발급까지<br>한번에 해결해 드려요.</p>
+            <a href="#" class="btn btn-service-detail" onclick="showModal('카드 신청', '신규 및 재발급 신청 절차를 시작합니다.')">자세히 보기</a>
+          </div>
+          <div class="service-icon-wrap">
+            <img src="./icon/icon_card.png" alt="카드 신청 아이콘">
+          </div>
+        </div>
+
+        <!-- Service 2: 쉬운 이용 안내 -->
+        <div class="service-card green-card">
+          <div class="service-info">
+            <h3 class="service-title">쉬운 이용 안내</h3>
+            <p class="service-desc">카드 신청부터 결제까지<br>차근차근 알려드려요.</p>
+            <a href="#" class="btn btn-service-detail" onclick="showModal('쉬운 이용 안내', '5060 및 신규 사용자를 위한 가이드북을 펼칩니다.')">자세히 보기</a>
+          </div>
+          <div class="service-icon-wrap">
+            <img src="./icon/icon_book_fill.svg" alt="쉬운 이용 안내 아이콘" class="svg-3d-effect">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Local Merchant Section: 우리 동네 문화누리카드 사용처 -->
+    <section class="merchant-section" id="merchant-section">
+      <div class="merchant-header">
+        <h2 class="section-title">우리 동네 문화누리카드 사용처 <span class="arrow-right">›</span></h2>
+        <div class="location-badge">
+          <span class="material-symbols-outlined">my_location</span>
+          <span id="currentLocationText">서울시 강남구</span> | 반경 1km 주변
+        </div>
+      </div>
+
+      <div class="merchant-content-grid">
+        <!-- Merchant List Panel -->
+        <div class="merchant-list">
+          <!-- Item 1 -->
+          <div class="merchant-item active" onclick="selectMerchant(this, '메가박스 코엑스', '37.5126', '127.0588')">
+            <div class="merchant-thumb">
+              <img src="./피그마 자료/이미지_메가박스.webp" alt="메가박스 코엑스">
+            </div>
+            <div class="merchant-details">
+              <div class="merchant-top">
+                <h3 class="merchant-name">메가박스 코엑스</h3>
+                <span class="distance-tag">도보 2분</span>
+              </div>
+              <p class="merchant-category">영화관</p>
+              <p class="merchant-address">
+                <span class="material-symbols-outlined">location_on</span>
+                서울 강남구 봉은사로 524 (삼성동, 코엑스몰 지하 1층)
+              </p>
+              <p class="merchant-phone">
+                <span class="material-symbols-outlined">call</span>
+                1544-0070
+              </p>
+            </div>
+          </div>
+
+          <!-- Item 2 -->
+          <div class="merchant-item" onclick="selectMerchant(this, '영풍문고 스타필드 코엑스몰점', '37.5118', '127.0592')">
+            <div class="merchant-thumb">
+              <img src="./피그마 자료/이미지_영풍문고.webp" alt="영풍문고">
+            </div>
+            <div class="merchant-details">
+              <div class="merchant-top">
+                <h3 class="merchant-name">영풍문고</h3>
+                <span class="distance-tag">도보 7분</span>
+              </div>
+              <p class="merchant-category">서점</p>
+              <p class="merchant-address">
+                <span class="material-symbols-outlined">location_on</span>
+                서울 강남구 삼성동 159 (스타필드 코엑스몰)
+              </p>
+              <p class="merchant-phone">
+                <span class="material-symbols-outlined">call</span>
+                02-6002-2718
+              </p>
+            </div>
+          </div>
+
+          <!-- Item 3 -->
+          <div class="merchant-item" onclick="selectMerchant(this, '알파 삼성점', '37.5090', '127.0605')">
+            <div class="merchant-thumb">
+              <img src="./피그마 자료/이미지_알파삼성점.webp" alt="알파 삼성점">
+            </div>
+            <div class="merchant-details">
+              <div class="merchant-top">
+                <h3 class="merchant-name">알파 삼성점</h3>
+                <span class="distance-tag">도보 10분</span>
+              </div>
+              <p class="merchant-category">문구/화방</p>
+              <p class="merchant-address">
+                <span class="material-symbols-outlined">location_on</span>
+                서울 강남구 테헤란로 534 (글라스타워 지하1층)
+              </p>
+              <p class="merchant-phone">
+                <span class="material-symbols-outlined">call</span>
+                02-557-0096
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Map View Panel -->
+        <div class="map-panel">
+          <div class="map-controls">
+            <button class="map-ctrl-btn" onclick="resetUserLocation()">
+              <span class="material-symbols-outlined">my_location</span> 내 위치
+            </button>
+            <button class="map-ctrl-btn" onclick="openLocationChangeModal()">
+              <span class="material-symbols-outlined">tune</span> 지역 변경
+            </button>
+          </div>
+
+          <div class="map-viewport">
+            <img src="./피그마 자료/지도_네이버강남.png" alt="강남구 지도" class="map-bg-img" id="mapBgImg">
+            
+            <!-- Map Markers -->
+            <div class="map-marker marker-1 active" title="메가박스 코엑스" style="top: 55%; left: 62%;">
+              <span class="marker-pin">🎬</span>
+              <span class="marker-tooltip">메가박스 코엑스</span>
+            </div>
+            <div class="map-marker marker-2" title="영풍문고" style="top: 42%; left: 48%;">
+              <span class="marker-pin">📚</span>
+              <span class="marker-tooltip">영풍문고</span>
+            </div>
+            <div class="map-marker marker-3" title="알파 삼성점" style="top: 68%; left: 40%;">
+              <span class="marker-pin">✏️</span>
+              <span class="marker-tooltip">알파 삼성점</span>
+            </div>
+
+            <!-- Map Zoom Buttons -->
+            <div class="zoom-controls">
+              <button onclick="zoomMap(1.1)">+</button>
+              <button onclick="zoomMap(0.9)">-</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- App Promotion Banner Bar -->
+    <section class="app-banner">
+      <div class="app-banner-content">
+        <div class="banner-text-group">
+          <h3>집에선 컴퓨터로, 밖에선 앱으로</h3>
+          <p>외출 중에도 주변 가맹점을 바로 찾을 수 있어요!</p>
+        </div>
+        <div class="banner-graphic-group">
+          <img src="./피그마 자료/아이콘_광고배너.png" alt="앱 서비스 그래픽" class="app-graphic-img">
+        </div>
+      </div>
+    </section>
+
+    <!-- Events Section: 문화누리와 함께하는 특별한 이벤트까지! -->
+    <section class="events-section">
+      <h2 class="section-title text-center">문화누리와 함께하는<br><strong class="highlight-dark">특별한 이벤트까지!</strong></h2>
+      
+      <div class="carousel-container">
+        <button class="carousel-btn prev-btn" id="eventPrevBtn"><span class="material-symbols-outlined">chevron_left</span></button>
+
+        <div class="carousel-track-wrapper">
+          <div class="carousel-track" id="eventTrack">
+            <!-- Event Card 1 -->
+            <div class="event-card mint-card">
+              <div class="badge-row">
+                <span class="status-badge active-badge">진행 중</span>
+                <span class="date-text">2025.04.01~2025.07.01</span>
+              </div>
+              <h3 class="event-title">신규 발급자 대상<br>전액 이용 인증 이벤트!</h3>
+              <a href="#" class="btn btn-event-action mint-btn" onclick="showModal('이벤트', '신규 발급자 인증 이벤트 페이지로 이동합니다.')">참여하기</a>
+              <div class="event-img-wrap">
+                <img src="./피그마 자료/문화누리_이벤트1.jpg" alt="신규 발급 인증 이벤트" class="event-img">
+              </div>
+            </div>
+
+            <!-- Event Card 2 -->
+            <div class="event-card yellow-card">
+              <div class="badge-row">
+                <span class="status-badge active-badge">진행 중</span>
+                <span class="date-text">2025.05.14~2025.06.14</span>
+              </div>
+              <h3 class="event-title">문화누리카드<br>첫 결제 이벤트!</h3>
+              <a href="#" class="btn btn-event-action yellow-btn" onclick="showModal('이벤트', '첫 결제 이벤트 상세 안내입니다.')">자세히 보기</a>
+              <div class="event-img-wrap">
+                <img src="./피그마 자료/문화누리_대표사진.png" alt="첫 결제 이벤트" class="event-img">
+              </div>
+            </div>
+
+            <!-- Event Card 3 -->
+            <div class="event-card blue-card">
+              <div class="badge-row">
+                <span class="status-badge closed-badge">종료</span>
+                <span class="date-text">2025.05.01~2025.05.14</span>
+              </div>
+              <h3 class="event-title">문화누리카드 캐릭터의<br>이름을 맞춰보세요!</h3>
+              <a href="#" class="btn btn-event-action blue-btn" onclick="showModal('이벤트', '종료된 캐릭터 퀴즈 이벤트입니다.')">맞춰보기</a>
+              <div class="event-img-wrap">
+                <img src="./피그마 자료/캐릭터_퀴즈_이벤트_1_2.jpg" alt="캐릭터 퀴즈 이벤트" class="event-img">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button class="carousel-btn next-btn" id="eventNextBtn"><span class="material-symbols-outlined">chevron_right</span></button>
+      </div>
+
+      <!-- Carousel Pagination Dots -->
+      <div class="dots-wrapper" id="eventDots">
+        <span class="dot active"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+      </div>
+    </section>
+
+    <!-- FAQ Accordion Section: 자주 묻는 질문 -->
+    <section class="faq-section" id="faq-section">
+      <div class="faq-header">
+        <h2 class="section-title">자주 묻는 질문</h2>
+        <a href="#" class="faq-more-link" onclick="showModal('FAQ 전체보기', '고객지원 FAQ 게시판으로 이동합니다.')">찾으시는 질문이 없나요? ›</a>
+      </div>
+
+      <div class="faq-accordion-list">
+        <!-- Item 1 -->
+        <div class="faq-item">
+          <button class="faq-question-btn" onclick="toggleFaq(this)">
+            <span class="faq-question-text">카드 비밀번호를 잊어버렸어요.</span>
+            <span class="faq-toggle-state">열기 <span class="material-symbols-outlined arrow-icon">expand_more</span></span>
+          </button>
+          <div class="faq-answer-panel">
+            <p>카드 비밀번호 4자리를 잊으신 경우, [카드 확인] 메뉴의 [비밀번호 변경/재설정] 또는 근처 주민센터 방문을 통해 본인 인증 후 신규 비밀번호로 즉시 재설정하실 수 있습니다.</p>
+          </div>
+        </div>
+
+        <!-- Item 2 -->
+        <div class="faq-item">
+          <button class="faq-question-btn" onclick="toggleFaq(this)">
+            <span class="faq-question-text">카드를 잃어버렸는데 어떡하죠?</span>
+            <span class="faq-toggle-state">열기 <span class="material-symbols-outlined arrow-icon">expand_more</span></span>
+          </button>
+          <div class="faq-answer-panel">
+            <p>분실 신고 및 재발급 신청은 문화누리카드 고객지원센터(1544-3412) 또는 가까운 읍·면·동 주민센터 및 홈페이지 [카드 신청] 메뉴에서 신청 가능합니다.</p>
+          </div>
+        </div>
+
+        <!-- Item 3 -->
+        <div class="faq-item">
+          <button class="faq-question-btn" onclick="toggleFaq(this)">
+            <span class="faq-question-text">올해 안에 다 쓰지 않으면 내년으로 넘어가는가요?</span>
+            <span class="faq-toggle-state">열기 <span class="material-symbols-outlined arrow-icon">expand_more</span></span>
+          </button>
+          <div class="faq-answer-panel">
+            <p>아닙니다. 문화누리카드 지원금은 당해 연도 12월 31일까지 사용 가능하며, 사용하지 않은 잔액은 국고로 자동 회수되어 이월되지 않습니다. 연내 꼭 모두 사용하시길 권장합니다.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-links">
+        <a href="#">개인정보처리방침</a>
+        <span class="divider">|</span>
+        <a href="#">이용약관</a>
+        <span class="divider">|</span>
+        <a href="#">이메일무단수집거부</a>
+        <span class="divider">|</span>
+        <a href="#">부정행위 신고센터</a>
+        <span class="divider">|</span>
+        <a href="#">사이트맵</a>
+      </div>
+
+      <div class="footer-info">
+        <div class="call-center">
+          <span class="call-label">문화누리카드 고객지원센터</span>
+          <strong class="phone-num">1544-3412</strong>
+        </div>
+        <p class="operating-hours">
+          운영시간 : 월~금(공휴일 제외) 09:00~12:00 / 13:00~18:00 | NH농협카드 고객센터 1644-4000
+        </p>
+        <p class="copyright-text">
+          한국문화예술위원회 사업자등록번호 208-82-01138<br>
+          COPYRIGHT © 한국문화예술위원회 ALL RIGHTS RESERVED
+        </p>
+      </div>
+
+      <div class="footer-logos">
+        <img src="./문화누리_원본자료/img_logo.png" alt="한국문화예술위원회" class="footer-logo">
+        <img src="./문화누리_원본자료/img_footer_mark03.png" alt="복권위원회" class="footer-logo">
+        <img src="./문화누리_원본자료/img_footer_mark_eprivacyplus.png" alt="웹접근성 인증" class="footer-logo-wa">
+      </div>
+    </div>
+  </footer>
+
+  <!-- Chatbot Drawer Modal -->
+  <div class="chatbot-modal-overlay" id="chatbotModal">
+    <div class="chatbot-drawer">
+      <div class="chatbot-header">
+        <div class="chat-avatar-large">
+          <img src="./피그마 자료/아이콘_챗봇.png" alt="챗봇 캐릭터">
+        </div>
+        <div class="chat-header-text">
+          <h3>무엇을 도와드릴까요?</h3>
+          <p>문화누리카드 AI 도우미입니다.</p>
+        </div>
+        <button class="chat-close-btn" onclick="toggleChatbotModal()">&times;</button>
+      </div>
+
+      <div class="chatbot-body">
+        <div class="chat-search-box">
+          <span class="material-symbols-outlined search-icon">search</span>
+          <input type="text" id="chatSearchInput" placeholder="궁금한 점을 검색해보세요." onkeypress="handleChatSubmit(event)">
+        </div>
+
+        <div class="quick-chips">
+          <button class="chip" onclick="askChatbot('카드를 분실했어요')">카드를 분실했어요</button>
+          <button class="chip" onclick="askChatbot('카드는 어디서 사용하나요?')">카드는 어디서 사용하나요?</button>
+          <button class="chip" onclick="askChatbot('타인에게 양도할 수 있나요?')">타인에게 양도할 수 있나요?</button>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+          <div class="chat-msg bot-msg">
+            <p>안녕하세요! 무엇이든 물어보시면 빠르게 도와드리겠습니다. 😊</p>
+          </div>
+        </div>
+
+        <div class="support-banner">
+          <div class="support-text">
+            <h4>문제가 아직 해결되지 않았다면<br>상담원에게 연락해주세요.</h4>
+            <p>문화누리카드 고객지원센터 <strong>1544-3412</strong></p>
+          </div>
+          <div class="support-img-wrap">
+            <img src="./피그마 자료/아이콘_메인배너_Web.png" alt="고객지원 그래픽">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- General Interactive Modal -->
+  <div class="generic-modal-overlay" id="genericModal">
+    <div class="generic-modal-card">
+      <h3 id="modalTitle">안내</h3>
+      <p id="modalBody">내용이 들어갑니다.</p>
+      <button class="btn btn-primary-modal" onclick="closeGenericModal()">확인</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

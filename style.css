@@ -1,0 +1,725 @@
+/* ==========================================================================
+   문화누리카드 (Munhwa Nuri Card) — Foundation
+   Design standard: PRD.md 6. 디자인 기준 (Figma 실측 기준)
+   이 파일은 공통 변수 / reset / 기본 스타일 / 반응형 브레이크포인트만 정의합니다.
+   섹션별 스타일은 이후 화면 단위로 추가합니다.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. 폰트 — Pretendard Variable (CDN)
+   -------------------------------------------------------------------------- */
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css");
+
+:root {
+  --font-primary: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
+    "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+  /* 헤더 로고 전용 서체(SeoulAlrim:Bold, Figma 확인). CDN 배포본이 없어
+     실제 웹폰트 파일(.woff2)을 받기 전까지는 font-primary로 대체됩니다. */
+  --font-logo: "SeoulAlrim", var(--font-primary);
+
+  /* --------------------------------------------------------------------
+     2. 색상 변수 — Figma get_variable_defs 실측값 그대로
+     -------------------------------------------------------------------- */
+  --color-primary-100: #f1f8ff;
+  --color-primary-200: #d0e7ff;
+  --color-primary-300: #7ebeff;
+  --color-primary-400: #1286ff; /* 메인 브랜드 컬러 */
+  --color-primary-500: #0a5fcc;
+  --color-primary-600: #003170;
+
+  --color-secondary-green-400: #4caf50;
+
+  --color-white: #ffffff;
+  --color-gray-100: #f2f2f2;
+  --color-gray-200: #d4d4d4;
+  --color-gray-300: #a3a3a3;
+  --color-gray-400: #525252;
+  --color-gray-500: #1a1a1a;
+
+  /* 섹션별 실측 과정에서 확인된 추가 raw 색상 (공식 Figma 변수 팔레트 외) */
+  --color-banner-purple: #7051ff;
+  --color-banner-yellow: #faff74;
+  --color-step-inactive-bg: #aeb8c3;
+  --color-login-card-bg: #d0e7ff; /* 태블릿/모바일 잔액확인 카드 배경 */
+  --color-login-card-bg-desktop: rgba(255, 255, 255, 0.75); /* 데스크톱 오버레이 카드 배경 */
+  --color-shop-phone-text: #8e7f7a;
+  --color-shop-address-text: #8e998f;
+  --color-faq-chip-bg-active: rgba(18, 134, 255, 0.14);
+  --color-faq-chip-bg: rgba(255, 255, 255, 0.7);
+
+  /* 그림자 — Figma effect 변수(brand_shadow2, brand_shadow_shop) + 실측 그림자 */
+  --shadow-card: 0 4px 6px rgba(0, 0, 0, 0.2); /* brand_shadow2 */
+  --shadow-list: 0 4px 6px rgba(22, 22, 22, 0.1); /* brand_shadow_shop */
+  --shadow-icon: 0 0 4.6px rgba(134, 134, 134, 0.09);
+  --shadow-quickmenu: 0 4px 3px rgba(0, 0, 0, 0.2);
+  --shadow-step-active: 0 4px 13.85px rgba(18, 134, 255, 0.49);
+
+  /* --------------------------------------------------------------------
+     3. 반응형 브레이크포인트 변수 (참고/문서화용)
+     CSS는 @media 조건절에서 var()를 지원하지 않으므로, 실제 미디어쿼리는
+     아래와 동일한 리터럴 값(768px / 1024px)을 직접 사용해야 합니다.
+     -------------------------------------------------------------------- */
+  --bp-tablet: 768px;
+  --bp-desktop: 1024px;
+}
+
+/* --------------------------------------------------------------------------
+   4. Reset / 기본 스타일
+   -------------------------------------------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden; /* PRD 14. 반응형 기준 — 가로 스크롤 금지 */
+}
+
+body,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+figure {
+  margin: 0;
+}
+
+body {
+  font-family: var(--font-primary);
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--color-gray-500);
+  background-color: var(--color-white);
+  word-break: keep-all;
+  -webkit-font-smoothing: antialiased;
+}
+
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+img,
+picture,
+svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* PRD 15. 접근성 — 키보드 포커스 표시 */
+:focus-visible {
+  outline: 2px solid var(--color-primary-400);
+  outline-offset: 2px;
+}
+
+/* PRD 15. 접근성 — 모션 최소화 설정 반영 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ==========================================================================
+   6. Header (Figma: Component 4, off/on 2 states)
+   이번 턴은 PC(1024px 이상) 값만 정확히 반영. 태블릿/모바일은 기능만 동작하는
+   임시 기본값이며, 각 브레이크포인트 Figma 링크를 받으면 실측값으로 교체 예정.
+   ========================================================================== */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  width: 100%;
+  backdrop-filter: blur(5.65px);
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.header_inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+}
+
+.header_logo {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.header_logo_icon {
+  width: 32px;
+  height: auto;
+}
+
+.header_logo_txt {
+  font-family: var(--font-logo);
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 1;
+  color: var(--color-primary-400);
+}
+
+.header_nav {
+  display: none;
+}
+
+.header_toggles {
+  display: none;
+}
+
+.header_ham_btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 44px;
+  height: 44px;
+}
+
+.header_ham_line {
+  width: 22px;
+  height: 2px;
+  background-color: var(--color-white);
+}
+
+/* Figma: 속성1=on — 전체메뉴 오버레이 패널 */
+.header_menu_panel {
+  background-color: var(--color-white);
+  padding: 24px;
+}
+
+.header_menu_top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+}
+
+.header_logo_txt_dark {
+  color: var(--color-primary-400);
+}
+
+.header_menu_close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+}
+
+.header_menu_close_icon {
+  width: 100%;
+  height: 100%;
+}
+
+.header_menu_tit {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--color-gray-500);
+  margin-bottom: 24px;
+}
+
+.header_menu_grid {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.header_menu_group_tit {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-gray-500);
+  margin-bottom: 16px;
+}
+
+.header_menu_group_list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.header_menu_group_list a {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-gray-500);
+}
+
+/* ==========================================================================
+   7. Hero Section (Figma: main_hero + login)
+   기본(base) 스타일 = 모바일(768px) 기준. 768px/1024px에서 태블릿/데스크톱 값으로 override.
+   ========================================================================== */
+.hero_section {
+  position: relative;
+}
+
+.hero_slider {
+  position: relative;
+  margin: 0 40px;
+  overflow: hidden;
+  border-radius: 15px;
+}
+
+.hero_track {
+  display: flex;
+  transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.hero_slide {
+  position: relative;
+  flex: 0 0 100%;
+  width: 100%;
+  height: 790px;
+  overflow: hidden;
+}
+
+.hero_slide_bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hero_slide_overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(16, 16, 16, 0.6);
+}
+
+.hero_slide_inner {
+  position: absolute;
+  left: 55px;
+  right: 55px;
+  bottom: 139px; /* 55px 패딩 + 텍스트-페이저 간 여백(Figma gap 89px 근사) */
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 35px; /* Figma 실측: txt그룹 ↔ more링크 간격(mobile/tablet) */
+}
+
+.hero_slide_txt {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px; /* Figma 실측: sub ↔ tit 간격(mobile/tablet) */
+}
+
+.hero_slide_sub {
+  font-size: 32px;
+  font-weight: 400;
+  line-height: normal;
+  color: var(--color-white);
+}
+
+.hero_slide_tit {
+  font-size: 48px;
+  font-weight: 400;
+  line-height: normal;
+  color: var(--color-white);
+}
+
+.hero_slide_tit strong {
+  font-weight: 700;
+}
+
+/* 슬라이드1 전용: 볼드 경계가 브레이크포인트마다 달라 별도 span으로 분리
+   (모바일/태블릿: "올해 문화생활,"이 통째로 Bold / 데스크톱: "문화생활"만 Bold) */
+.hero_slide_tit_shift {
+  font-weight: 700;
+}
+
+.hero_more_link {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  font-size: 24px;
+  font-weight: 300;
+  line-height: 1.2;
+  color: var(--color-white);
+  border-bottom: 1px solid var(--color-white);
+}
+
+.hero_more_icon {
+  width: 25px;
+  height: auto; /* asset/arrow.svg 원본 비율(27:9) 유지, Figma 실측 폭 25px 기준 */
+}
+
+.hero_pager {
+  position: absolute;
+  left: 50%;
+  bottom: 55px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 35px;
+  transform: translateX(-50%);
+}
+
+.hero_pager_btn {
+  display: flex;
+  color: var(--color-white);
+}
+
+.hero_pager_count {
+  font-size: 24px;
+  line-height: normal;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.hero_pager_count strong {
+  font-weight: 700;
+  color: var(--color-white);
+}
+
+/* Figma: login (잔액확인 카드) — 모바일/태블릿은 히어로 아래 일반 블록 */
+.balance_card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 50px;
+  height: 375px; /* Figma 실측(login, mobile/tablet 공통 고정값) */
+  margin: 0 40px;
+  padding: 0; /* Figma 실측: mobile/tablet은 padding 지정 없음 */
+  background-color: var(--color-login-card-bg);
+  border-radius: 15px;
+}
+
+.balance_card_txt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  text-align: center;
+}
+
+.balance_card_sub {
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--color-gray-400);
+}
+
+.balance_card_tit {
+  font-size: 34px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--color-gray-500);
+}
+
+.balance_card_actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 25px;
+  width: 100%;
+}
+
+.balance_card_cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 50px;
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--color-white);
+  background-color: var(--color-primary-400);
+  border-radius: 15px;
+  height: 64px;
+}
+
+.balance_card_links {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding: 0 6px;
+}
+
+.balance_card_links a {
+  font-size: 20px;
+  font-weight: 300;
+  line-height: 1.2;
+  color: var(--color-gray-500);
+}
+
+.balance_card_divider {
+  display: inline-block;
+  width: 1px;
+  height: 15px;
+  background-color: var(--color-gray-500);
+}
+
+/* --------------------------------------------------------------------------
+   8. 반응형 브레이크포인트 — 섹션 스타일은 이후 여기에 추가
+   -------------------------------------------------------------------------- */
+@media (min-width: 768px) {
+  /* 태블릿(768px) 이상 — main_hero: 풀블리드(카드 처리 없음), 슬라이드 757px */
+  .hero_slider {
+    margin: 0;
+    border-radius: 0;
+  }
+
+  .hero_slide {
+    height: 757px;
+  }
+
+  .hero_slide_inner {
+    left: 48px;
+    right: 48px;
+    bottom: 132px; /* 48px 패딩 + 텍스트-페이저 간 여백(Figma gap 89px 근사) */
+  }
+
+  .hero_pager {
+    bottom: 48px;
+  }
+
+  .balance_card {
+    margin: 0 132px;
+  }
+}
+
+@media (min-width: 1024px) {
+  /* 데스크톱(1024px) 이상 — main_hero: 절대 위치 텍스트 + 잔액확인 카드 오버레이 */
+  .hero_slider {
+    margin: 0;
+  }
+
+  .hero_slide {
+    height: 1021px;
+    display: flex;
+    align-items: center;
+  }
+
+  .hero_slide_inner {
+    position: static;
+    left: auto;
+    right: auto;
+    bottom: auto;
+    padding-left: 196px;
+    gap: 76px; /* Figma 실측: txt그룹 ↔ more링크 간격(desktop) */
+  }
+
+  .hero_slide_txt {
+    gap: 18px; /* Figma 실측: sub ↔ tit 간격(desktop) */
+  }
+
+  .hero_slide_sub {
+    font-size: 32px;
+    font-weight: 500;
+  }
+
+  .hero_slide_tit {
+    font-size: 59px;
+    font-weight: 700;
+  }
+
+  /* Figma 실측: 슬라이드1(01/03)만 메인 타이틀이 72px로 더 큼 */
+  .hero_slide[data-slide-index="0"] .hero_slide_sub {
+    font-weight: 400;
+  }
+
+  .hero_slide[data-slide-index="0"] .hero_slide_tit {
+    font-size: 72px;
+    font-weight: 500; /* Figma 실측: 데스크톱 슬라이드1 비강조 텍스트는 Medium(500) */
+  }
+
+  /* Figma 실측: 데스크톱은 "문화생활"만 Bold, "올해 "/"," 는 Medium(500) */
+  .hero_slide[data-slide-index="0"] .hero_slide_tit_shift {
+    font-weight: 500;
+  }
+
+  .hero_pager {
+    bottom: 80px;
+  }
+
+  /* Figma: 잔액확인 카드는 히어로 우측에 오버레이 (right_box, rgba(255,255,255,.75)) */
+  .balance_card {
+    position: absolute;
+    top: 50%;
+    right: 196px;
+    z-index: 3;
+    width: 451px;
+    height: 576px; /* Figma 실측(right_box 고정값) */
+    gap: 160px; /* Figma 실측: desktop만 160px (mobile/tablet은 50px) */
+    margin: 0;
+    padding: 35px 39px; /* Figma 실측: desktop만 padding 존재(mobile/tablet은 0) */
+    background-color: var(--color-login-card-bg-desktop);
+    transform: translateY(-50%);
+  }
+
+  .balance_card_txt {
+    gap: 25px; /* Figma 실측: desktop만 25px (mobile/tablet은 20px) */
+  }
+
+  .balance_card_cta {
+    width: 100%;
+    padding: 10px;
+    border-radius: 7px;
+  }
+
+  /* Figma 실측: 헤더(Component 4) 데스크톱 값 */
+  .header_inner {
+    padding: 16px 160px;
+  }
+
+  .header_right {
+    display: flex;
+    align-items: center;
+    gap: 35px;
+  }
+
+  .header_nav {
+    display: flex;
+    align-items: flex-start;
+  }
+
+  .header_nav_item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 160px;
+    height: 40px;
+    font-size: 24px;
+    font-weight: 500;
+    color: var(--color-white);
+  }
+
+  .header_toggles {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .header_toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .header_toggle_track {
+    display: flex;
+    align-items: center;
+    width: 40px;
+    height: 22px;
+    padding: 2px;
+    background-color: var(--color-gray-100);
+    border-radius: 15px;
+  }
+
+  .header_toggle_thumb {
+    width: 15px;
+    height: 15px;
+    background-color: var(--color-gray-300);
+    border-radius: 10px;
+    transition: transform 0.2s ease;
+  }
+
+  .header_toggle[aria-pressed="true"] .header_toggle_track {
+    background-color: var(--color-primary-400);
+    justify-content: flex-end;
+  }
+
+  .header_toggle[aria-pressed="true"] .header_toggle_thumb {
+    background-color: var(--color-white);
+  }
+
+  .header_toggle_label {
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--color-white);
+  }
+
+  .header_ham_btn {
+    width: 60px;
+    height: 60px;
+  }
+
+  .header.is_menu_open .header_inner {
+    display: none;
+  }
+
+  .header_menu_panel {
+    padding: 30px 70px;
+  }
+
+  .header_menu_top {
+    margin-bottom: 70px;
+  }
+
+  .header_logo_txt_dark {
+    font-size: 32px;
+  }
+
+  .header_menu_tit {
+    font-size: 36px;
+    font-weight: 600;
+    margin-bottom: 60px;
+  }
+
+  .header_menu_grid {
+    flex-direction: row;
+    gap: 0;
+  }
+
+  .header_menu_group {
+    width: 325px;
+  }
+
+  .header_menu_group_tit {
+    font-size: 26px;
+    margin-bottom: 32px;
+  }
+
+  .header_menu_group_list {
+    gap: 0;
+  }
+
+  .header_menu_group_list a {
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 2.4;
+  }
+}
