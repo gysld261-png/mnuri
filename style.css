@@ -241,16 +241,8 @@ svg {
 }
 
 .header_logo_icon {
-  width: 32px;
-  height: 34px;
-}
-
-.header_logo_txt {
-  font-family: var(--font-logo);
-  font-weight: 700;
-  font-size: 24px;
-  line-height: 1;
-  color: var(--color-primary-400);
+  width: 182px;
+  height: 56px;
 }
 
 .header_nav {
@@ -328,10 +320,6 @@ svg {
 /* 데스크톱 메가메뉴 전용 로고 (태블릿/모바일은 숨김, home+로그인으로 대체) */
 .header_menu_top .header_logo {
   display: none;
-}
-
-.header_logo_txt_dark {
-  color: var(--color-primary-400);
 }
 
 /* 태블릿/모바일 전용: home 아이콘 + 로그인 버튼 (Figma: 속성1=tab,속성2=nav 상단행) */
@@ -1162,7 +1150,7 @@ svg {
    -------------------------------------------------------------------------- */
 .event_section {
   background-color: #ebf5ff;
-  padding: 60px 40px;
+  padding: 80px 40px 100px;
 }
 
 .event_inner {
@@ -1362,6 +1350,24 @@ svg {
   padding: 10px 20px;
 }
 
+.help_search_icon {
+  font-size: 24px;
+  color: var(--color-gray-300);
+  margin-right: 12px;
+}
+
+.help_search_input {
+  flex: 1;
+  border: none;
+  background: none;
+  font-size: 22px;
+  color: var(--color-gray-500);
+}
+
+.help_search_input::placeholder {
+  color: var(--color-gray-300);
+}
+
 .help_chips {
   align-self: flex-start; /* Figma 실측: bottom 그룹(검색창+칩)은 items-start */
   display: flex;
@@ -1504,14 +1510,18 @@ svg {
     left: 0;
     backdrop-filter: blur(5.65px);
     background-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(0);
+    transition: transform 0.3s ease;
+  }
+
+  /* Figma엔 없는 UX 개선 — 스크롤 방향 감지 헤더 숨김/노출(design-analysis.md 기록 대상).
+     헤더가 fixed인 태블릿·데스크톱에만 적용. 모바일은 헤더가 문서 흐름(relative)이라 제외. */
+  .header.is_hidden {
+    transform: translateY(-100%);
   }
 
   .header_inner {
     padding: 16px 24px;
-  }
-
-  .header_logo_icon {
-    height: auto;
   }
 
   .header_ham_btn,
@@ -2452,17 +2462,6 @@ svg {
     border-radius: 7px;
   }
 
-  /* Figma엔 없는 UX 개선 — 데스크톱 전용 스크롤 방향 감지 헤더 숨김/노출
-     (design-analysis.md 기록 대상). 태블릿/모바일은 이 규칙 밖(base)이라 영향 없음. */
-  .header {
-    transform: translateY(0);
-    transition: transform 0.3s ease;
-  }
-
-  .header.is_hidden {
-    transform: translateY(-100%);
-  }
-
   /* Figma 실측: 헤더(Component 4) 데스크톱 값.
      1920px보다 넓은 화면에서 .header 자체 배경(반투명 흰색)은 전체 폭을 채우되,
      내부 콘텐츠(로고/GNB/토글/햄버거)는 1920px 프레임에서 더 벌어지지 않도록 고정 */
@@ -2594,10 +2593,6 @@ svg {
 
   .header_menu_top_left {
     display: none;
-  }
-
-  .header_logo_txt_dark {
-    font-size: 32px;
   }
 
   /* 데스크톱만 "전체메뉴" 타이틀 노출 */

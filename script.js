@@ -264,9 +264,9 @@ function handleHeaderMenuToggle(header, hamBtn, menuPanel, isOpen) {
   }
 }
 
-/* Figma엔 없는 UX 개선 — 데스크톱(1920px↑) 전용 스크롤 방향 감지 헤더 숨김/노출.
-   CSS(.header.is_hidden)가 1920px 미만에서는 아무 효과가 없으므로,
-   태블릿/모바일(햄버거+오버레이 구조)은 이 로직이 실행돼도 화면엔 영향 없음. */
+/* Figma엔 없는 UX 개선 — 스크롤 방향 감지 헤더 숨김/노출.
+   CSS(.header.is_hidden)가 1024px 이상(헤더가 fixed인 태블릿·데스크톱)에만 정의돼 있어,
+   모바일은 이 로직이 실행돼도 화면엔 영향 없음. */
 function initHeaderScrollBehavior() {
   const header = document.getElementById('site_header');
   if (!header) return;
