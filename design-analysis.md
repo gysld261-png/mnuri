@@ -32,9 +32,12 @@
 
 ## 반응형
 
-- 360px: [한 열 배치, 숨김 또는 이동하는 요소]
-- 768px: [태블릿 배치]
-- 1280px: [데스크톱 최대 폭과 열 구성]
+브레이크포인트 정의는 CLAUDE.md "반응형 기준" / PRD.md 14번 항목 참고(기본 스타일=모바일
+768px 아트보드, `min-width:1024px`=태블릿, `min-width:1920px`=데스크톱).
+
+- 모바일(~1023px): 1열 배치, quickmenu 카드 세로 스택, 헤더는 햄버거+오른쪽 슬라이드 드로어
+- 태블릿(1024~1919px): quickmenu 2열 그리드, merchant 카테고리 1줄+사진카드 리스트, 헤더는 햄버거+오른쪽 슬라이드 드로어
+- 데스크톱(1920px~): 콘텐츠 max-width 1400px(헤더/히어로는 예외로 1920px 프레임 기준, 자세한 건 위 "확인된 사실" 항목 참고), 헤더는 햄버거 클릭 시 전체메뉴 오버레이(슬라이드 없이 페이드)
 
 ## 인터랙션
 
@@ -107,6 +110,13 @@
   `transform:scale(1.04)` + `box-shadow` 강조, `transition .25s ease`. 브레이크포인트가
   아니라 `@media (hover:hover) and (pointer:fine)`로 감싸서 실제 마우스 호버가 가능한
   기기에서만 적용되고(데스크톱, 마우스 연결 태블릿 등) 터치 전용 기기에는 자동으로 빠짐.
+  이후 사용자 요청으로 "호버 안 한 나머지 카드는 어두워지게"도 추가 — `.quickmenu_list:has(.quickmenu_card:hover) .quickmenu_card:not(:hover){opacity:.5}`
+  (CSS `:has()` 사용, 별도 JS 없이 순수 CSS로 구현).
+  이후 데스크톱(1920px↑)만 따로, "확대가 scale이 아니라 실제 크기(width/height)로 커졌으면
+  좋겠다"는 요청으로 `@media (min-width:1920px) and (hover:hover) and (pointer:fine)`에서
+  `transform:none`으로 되돌리고 `width:420→440px, height:460→480px`로 대체. `.quickmenu_list`가
+  flex라 호버 시 옆 카드가 살짝 줄어들며 자리를 내줄 수 있음(사용자에게 확인 후 의도적으로 채택).
+  태블릿(grid 레이아웃, 트랙 오버플로 위험)과 모바일은 기존 scale 그대로 유지.
   구현: `style.css`(base 영역, 첫 `@media (min-width:1024px)` 직전 — 브레이크포인트 무관).
 - **(2026-07-29) `a:visited` 명시도 버그 수정.** `a:visited{color:inherit}`(지난 세션에
   추가)가 `a:visited` 의사클래스라서 `.quickmenu_card_more{color:white}` 같은 단일 클래스

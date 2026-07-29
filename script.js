@@ -171,8 +171,6 @@ function handleStepCardClick(cardEl) {
    -------------------------------------------------------------------------- */
 function initEventTabs() {
   const tabButtons = document.querySelectorAll('.event_tab_btn');
-  const list = document.querySelector('.event_list');
-  const emptyTxt = document.querySelector('.event_empty_txt');
   if (!tabButtons.length) return;
 
   tabButtons.forEach((btn) => {
@@ -183,10 +181,6 @@ function initEventTabs() {
       });
       btn.classList.add('is_active');
       btn.setAttribute('aria-selected', 'true');
-
-      const isEventTab = btn.dataset.eventTab === 'event';
-      if (list) list.hidden = !isEventTab;
-      if (emptyTxt) emptyTxt.hidden = isEventTab;
     });
   });
 }

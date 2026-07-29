@@ -87,6 +87,8 @@ html,
 body {
   max-width: 100%;
   overflow-x: hidden; /* PRD 14. 반응형 기준 — 가로 스크롤 금지 */
+  /* overflow-x: clip 시도했으나 how_steps 가로 스크롤 및 quickmenu_list 레이아웃이
+     깨져서 hidden으로 원복. event_banner sticky 문제는 별도 방법으로 재접근 예정. */
 }
 
 body,
@@ -219,21 +221,17 @@ svg {
    임시 기본값이며, 각 브레이크포인트 Figma 링크를 받으면 실측값으로 교체 예정.
    ========================================================================== */
 .header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
+  position: relative;
   z-index: 100;
   width: 100%;
-  backdrop-filter: blur(5.65px);
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: var(--color-white);
 }
 
 .header_inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 24px;
+  padding: 20px 40px;
 }
 
 .header_logo {
@@ -244,7 +242,7 @@ svg {
 
 .header_logo_icon {
   width: 32px;
-  height: auto;
+  height: 34px;
 }
 
 .header_logo_txt {
@@ -265,32 +263,15 @@ svg {
 
 .header_ham_btn {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  width: 44px;
-  height: 44px;
+  width: 60px;
+  height: 60px;
 }
 
-.header_ham_line {
-  width: 22px;
-  height: 2px;
-  background-color: var(--color-white);
-  transition: transform 0.3s ease, opacity 0.3s ease;
-}
-
-/* Figma엔 없는 UX 개선 — 태블릿/모바일 전용 햄버거→X 모션(design-analysis.md 기록 대상) */
-.header.is_menu_open .header_ham_line:nth-child(1) {
-  transform: translateY(8px) rotate(45deg);
-}
-
-.header.is_menu_open .header_ham_line:nth-child(2) {
-  opacity: 0;
-}
-
-.header.is_menu_open .header_ham_line:nth-child(3) {
-  transform: translateY(-8px) rotate(-45deg);
+.header_ham_icon {
+  width: 60px;
+  height: 60px;
 }
 
 /* Figma엔 없는 UX 개선 — 태블릿/모바일 전용 딤(dim) 배경(design-analysis.md 기록 대상) */
@@ -671,6 +652,85 @@ svg {
 }
 
 /* --------------------------------------------------------------------------
+   7-1. Quick Menu (Figma: card, node 1:548) — 모바일(768px) 기준
+   -------------------------------------------------------------------------- */
+.quickmenu_section {
+  padding: 50px 40px 100px;
+}
+
+.quickmenu_inner {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  width: 100%;
+  max-width: 688px;
+  margin: 0 auto;
+}
+
+.quickmenu_tit {
+  font-size: 44px;
+  font-weight: 700;
+  line-height: 1.5;
+  color: var(--color-gray-500);
+}
+
+.quickmenu_list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: 30px;
+  height: 418px;
+}
+
+.quickmenu_card {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 25px;
+  overflow: hidden;
+  border-radius: 15px;
+}
+
+.quickmenu_card_blue {
+  background-color: var(--color-primary-400);
+}
+
+.quickmenu_card_green {
+  background-color: var(--color-secondary-green-400);
+}
+
+.quickmenu_card_lightblue {
+  grid-column: 1 / -1;
+  background-color: var(--color-primary-300);
+}
+
+.quickmenu_card_txt {
+  display: flex;
+  flex-direction: column;
+  gap: 45px;
+}
+
+.quickmenu_card_tit {
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--color-white);
+}
+
+.quickmenu_card_desc {
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--color-white);
+}
+
+/* 모바일 시안에는 데스크톱 전용 상세 링크와 장식 이미지가 없다. */
+.quickmenu_card_more,
+.quickmenu_card_deco {
+  display: none;
+}
+
+/* --------------------------------------------------------------------------
    7-1. Promotion Banner — 모바일(768px, base) 기준 (Figma: banner, node 1:650)
    태블릿(node 1:1184)과 수치가 달라 base 전용으로 별도 작성.
    -------------------------------------------------------------------------- */
@@ -734,7 +794,7 @@ svg {
    배경색+텍스트+아이콘이 항상 같이, 비율 그대로 확대됨(내부 요소 개별 확대 아님). */
 @media (hover: hover) and (pointer: fine) {
   .quickmenu_card {
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, opacity 0.25s ease;
   }
 
   .quickmenu_card:hover {
@@ -742,12 +802,724 @@ svg {
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
     z-index: 1; /* 확대 시 옆 카드에 가리지 않도록 */
   }
+
+  /* 카드 3개 중 하나에 호버하면 나머지는 살짝 어두워져서 호버한 카드에 시선이 집중되도록 */
+  .quickmenu_list:has(.quickmenu_card:hover) .quickmenu_card:not(:hover) {
+    opacity: 0.5;
+  }
+}
+
+/* 데스크톱(1920px↑)은 scale 대신 실제 width/height가 커지도록 요청받아 대체.
+   .quickmenu_list가 flex라 옆 카드가 살짝 줄어들며 자리를 내줄 수 있음(의도된 동작). */
+@media (min-width: 1920px) and (hover: hover) and (pointer: fine) {
+  .quickmenu_card {
+    transition: width 0.25s ease, height 0.25s ease, box-shadow 0.25s ease, opacity 0.25s ease;
+  }
+
+  .quickmenu_card:hover {
+    transform: none;
+    width: 440px;
+    height: 480px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   7-2. Merchant Finder (Figma: shop, node 1:570) — 모바일(768px) 기준
+   태블릿(node 1:1102)과 카드 디자인(418×546px, gap 60px 등) 동일, 컨테이너 여백만 다름
+   -------------------------------------------------------------------------- */
+.merchant_section {
+  background-color: var(--color-shop-section-bg);
+  padding: 70px 0;
+}
+
+.merchant_inner {
+  padding: 0 40px;
+}
+
+.merchant_tit_group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 58px;
+}
+
+.merchant_subtit {
+  font-size: 32px;
+  font-weight: 300;
+  color: var(--color-gray-400);
+}
+
+.merchant_tit {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  font-size: 44px;
+  font-weight: 700;
+  color: var(--color-gray-500);
+}
+
+.merchant_tit_arrow {
+  font-size: 50px;
+  color: var(--color-gray-500);
+}
+
+.merchant_bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.merchant_categories {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 35px;
+  margin-bottom: 58px;
+}
+
+.merchant_category_btn {
+  width: 101px;
+  height: 101px;
+  border-radius: 15px;
+  background: var(--color-white);
+  box-shadow: var(--shadow-icon);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+
+.merchant_category_icon {
+  font-size: 40px;
+  color: var(--color-primary-400);
+}
+
+.merchant_category_label {
+  font-size: 18px;
+  color: var(--color-primary-400);
+}
+
+.merchant_category_btn.is_active {
+  background: var(--color-primary-400);
+}
+
+.merchant_category_btn.is_active .merchant_category_icon,
+.merchant_category_btn.is_active .merchant_category_label {
+  color: var(--color-primary-100);
+}
+
+.merchant_contents {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Figma에 검색/지역선택/지도가 없어 데스크톱 전용 패널은 숨김 */
+.merchant_panel {
+  display: block;
+}
+
+.merchant_search_panel,
+.merchant_map_panel,
+.merchant_location_row {
+  display: none;
+}
+
+.merchant_tablet_cards {
+  display: flex;
+  gap: 60px;
+  overflow-x: auto; /* Figma 실측: 카드 3개(418px×3+gap)가 768px 폭보다 넓어 가로 스크롤 구조 */
+  margin-right: -40px; /* merchant_inner 우측 패딩(40px) 상쇄 — 카드 스크롤을 화면 오른쪽 끝까지 열어 답답함 해소(왼쪽 40px 정렬은 유지) */
+}
+
+.merchant_tablet_card {
+  position: relative;
+  width: 418px;
+  height: 546px;
+  flex-shrink: 0; /* flex가 카드 폭을 줄이지 않도록 고정 */
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 1px 5.6px rgba(0, 0, 0, 0.18);
+}
+
+.merchant_tablet_card > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.merchant_tablet_card_info {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 145px; /* Figma 실측(node 1:1140): 흰색 info 영역 고정 높이 — 주소 줄 수와 무관하게 3카드 동일 */
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 25px;
+  background-color: var(--color-white);
+}
+
+.merchant_tablet_card_top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  line-height: 1; /* Figma 실측(node 1:1141): leading-none — info 145px 높이에 맞게 촘촘 */
+  padding: 1px 0; /* Figma 실측: py-px */
+}
+
+.merchant_tablet_card_bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 5px; /* Figma 실측(node 1:1146): 전화↔주소 간격 5px (이름줄↔묶음은 info gap 18px) */
+}
+
+.merchant_tablet_card_name {
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--color-gray-500);
+}
+
+.merchant_tablet_card_category {
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--color-gray-300);
+}
+
+.merchant_tablet_card_distance {
+  margin-left: auto;
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--color-primary-400);
+}
+
+.merchant_tablet_card_phone,
+.merchant_tablet_card_address {
+  display: flex;
+  gap: 5px;
+  font-size: 18px;
+}
+
+.merchant_tablet_card_phone {
+  align-items: center; /* Figma 실측: 전화번호는 한 줄이라 center */
+  line-height: 1; /* Figma 실측(node 1:1149): leading-none */
+  font-weight: 500;
+  color: var(--color-shop-phone-text);
+}
+
+.merchant_tablet_card_address {
+  align-items: center; /* Figma 실측: 주소는 1줄(넘치면 말줄임)이라 center 정렬 */
+  line-height: 1.3;
+  font-weight: 400;
+  color: var(--color-shop-address-text);
+}
+
+.merchant_tablet_card_address_txt {
+  flex: 1;
+  min-width: 0; /* flex 아이템 말줄임(text-overflow) 동작에 필수 */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* Figma 실측: 긴 주소는 한 줄에서 …로 잘림 */
+}
+
+/* --------------------------------------------------------------------------
+   7-3. Card Application Guide (Figma: how, node 1:659) — 모바일(768px) 기준
+   5단계 카드 크기/간격(420×555px, gap 61px)은 태블릿(node 1:1193)과 동일, 컨테이너 여백만 다름
+   -------------------------------------------------------------------------- */
+.how_section {
+  padding: 40px 0 120px;
+}
+
+.how_inner {
+  max-width: none;
+  margin: 0;
+  padding: 0 0 0 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+}
+
+.how_txt {
+  display: flex;
+  flex-direction: column;
+  gap: 50px;
+  padding: 0;
+}
+
+.how_tit {
+  font-size: 44px;
+  font-weight: 700;
+  color: var(--color-gray-500);
+}
+
+.how_tit_highlight {
+  color: var(--color-primary-500);
+}
+
+.how_tabs {
+  display: flex;
+  gap: 20px;
+}
+
+.how_tab_btn {
+  padding: 15px 0;
+  width: 110px;
+  font-size: 24px;
+  font-weight: 300;
+  letter-spacing: -0.72px;
+  color: var(--color-gray-300);
+  text-align: center;
+}
+
+.how_tab_btn.is_active {
+  color: var(--color-primary-400);
+  border-bottom: 1px solid var(--color-primary-400);
+}
+
+.how_steps {
+  display: flex;
+  gap: 61px;
+  overflow-x: auto; /* Figma 실측: 카드 5개(420px×5+gap)가 768px 폭보다 넓어 가로 스크롤 구조 */
+}
+
+.how_step {
+  position: relative;
+  width: 420px;
+  height: 555px;
+  flex-shrink: 0;
+  border-radius: 15px;
+  background: var(--color-step-inactive-bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 35px;
+  cursor: pointer;
+}
+
+.how_step.is_active {
+  background: var(--color-white);
+  border: 2px solid var(--color-primary-400);
+  box-shadow: var(--shadow-step-active);
+}
+
+.how_step_number {
+  width: 88px;
+  height: 88px;
+  border-radius: 44px;
+  background: var(--color-white);
+  color: var(--color-gray-300);
+  font-size: 36px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.how_step.is_active .how_step_number {
+  background: var(--color-primary-400);
+  color: var(--color-white);
+}
+
+.how_step_chip {
+  padding: 7px 15px;
+  border-radius: 20px;
+  background: var(--color-gray-100);
+  color: var(--color-gray-400);
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.how_step_main {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--color-white);
+  text-align: center;
+  line-height: 1.4;
+}
+
+.how_step.is_active .how_step_main {
+  color: var(--color-gray-500);
+}
+
+.how_step_sub {
+  font-size: 24px;
+  font-weight: 500;
+  color: var(--color-gray-100);
+  text-align: center;
+  line-height: 1.4;
+}
+
+.how_step.is_active .how_step_sub {
+  color: var(--color-gray-400);
+}
+
+/* --------------------------------------------------------------------------
+   7-4. News/Events (Figma: event, node 1:681) — 모바일(768px) 기준
+   구조 차이: 왼쪽 프로모션 배너 없음, 리스트 아이템 이미지가 왼쪽(데스크톱은 오른쪽).
+   태블릿과 달리 아이템끼리 보더 공유 없이 50px 간격 + 텍스트 블록에 개별 보더.
+   -------------------------------------------------------------------------- */
+.event_section {
+  background-color: #ebf5ff;
+  padding: 60px 40px;
+}
+
+.event_inner {
+  display: block;
+}
+
+.event_banner {
+  display: none;
+}
+
+.event_content {
+  display: flex;
+  flex-direction: column;
+  gap: 43px;
+}
+
+.event_txt {
+  display: flex;
+  flex-direction: column;
+  gap: 50px;
+}
+
+.event_tit {
+  font-size: 44px;
+  font-weight: 700;
+  line-height: normal;
+  color: var(--color-gray-500);
+}
+
+.event_content_top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.event_tabs {
+  display: flex;
+  gap: 0;
+}
+
+.event_tab_btn {
+  width: 100px;
+  padding: 15px 0;
+  font-size: 24px;
+  font-weight: 300;
+  letter-spacing: -0.72px;
+  color: var(--color-gray-300);
+  text-align: center;
+}
+
+.event_tab_btn.is_active {
+  color: var(--color-primary-400);
+  border-bottom: 1px solid var(--color-primary-400);
+}
+
+.event_more_link {
+  display: inline-flex;
+  align-items: center;
+  font-size: 24px;
+  font-weight: 500;
+  color: var(--color-gray-400);
+}
+
+.event_more_link .material-symbols-outlined {
+  font-size: 30px;
+}
+
+.event_list {
+  display: flex;
+  flex-direction: column;
+  gap: 50px;
+}
+
+/* Figma 실측: 모바일도 카드 4개까지만 존재("문화누리 인스타그램 구독 이벤트"는 데스크톱 전용) */
+.event_list .event_item:last-child {
+  display: none;
+}
+
+.event_item {
+  display: flex;
+  align-items: stretch; /* 텍스트 영역 높이를 이미지(197px)에 맞춰 구분선을 이미지 위아래에 정렬 */
+  gap: 30px;
+}
+
+.event_item_txt {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0;
+  border-top: 1px solid var(--color-gray-300); /* Figma 실측(node 1:699): 카드별 위아래 구분선, 이미지 높이에 맞춤 */
+  border-bottom: 1px solid var(--color-gray-300);
+  padding: 0 20px;
+}
+
+.event_item_date {
+  font-size: 20px;
+  line-height: 1;
+  color: var(--color-gray-400);
+  margin-bottom: 13px;
+}
+
+.event_item_title {
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--color-gray-500);
+  margin-bottom: 45px;
+}
+
+.event_item_chips {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.event_chip {
+  height: 44px;
+  padding: 0 15px;
+  border-radius: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--color-white);
+}
+
+.event_chip_ongoing { background: var(--color-primary-600); }
+.event_chip_dday { background: var(--color-primary-400); padding: 0 12px; }
+.event_chip_urgent { background: var(--color-secondary-green-400); }
+.event_chip_closed { background: var(--color-gray-200); color: var(--color-gray-400); }
+
+.event_item_img {
+  order: -1;
+  width: 250px;
+  height: 197px;
+  border-radius: 15px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.event_empty_txt {
+  font-size: 20px;
+  color: var(--color-gray-400);
+  padding: 60px 0;
+  text-align: center;
+}
+
+/* --------------------------------------------------------------------------
+   7-5. FAQ Search (Figma: help, node 1:746) — 모바일(768px) 기준
+   태블릿(node 1:1280)과 대부분 동일값(그라디언트, 568px 폭, 칩 wrap 구조 등)
+   -------------------------------------------------------------------------- */
+.help_section {
+  min-height: 882px; /* Figma 실측 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-image: linear-gradient(
+    246.998deg,
+    var(--color-help-gradient-1) 0%,
+    var(--color-help-gradient-2) 49.504%,
+    var(--color-help-gradient-3) 100%
+  );
+}
+
+.help_inner {
+  width: 568px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.help_avatar {
+  width: 140px;
+  height: 140px;
+  object-fit: contain;
+  margin-bottom: 20px;
+}
+
+.help_tit {
+  font-size: 40px;
+  font-weight: 700;
+  line-height: normal;
+  color: var(--color-gray-500);
+  margin-bottom: 27px;
+}
+
+.help_search {
+  position: relative;
+  width: 100%;
+  height: 69px;
+  border: 1px solid var(--color-gray-300);
+  border-radius: 50px;
+  display: flex;
+  align-items: center;
+  padding: 10px 20px;
+}
+
+.help_chips {
+  align-self: flex-start; /* Figma 실측: bottom 그룹(검색창+칩)은 items-start */
+  display: flex;
+  flex-wrap: wrap;
+  width: 390px;
+  gap: 15px 13px;
+  margin-top: 27px;
+}
+
+.help_chip {
+  height: 45px;
+  padding: 10px;
+  border-radius: 100px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-primary-400);
+  background: var(--color-faq-chip-bg);
+  white-space: nowrap;
+}
+
+.help_chip.is_active {
+  background: var(--color-faq-chip-bg-active);
+}
+
+/* --------------------------------------------------------------------------
+   7-6. Footer (Figma: footer, node 1:765) — 모바일(768px) 기준
+   -------------------------------------------------------------------------- */
+.footer {
+  background: var(--color-gray-500);
+  color: var(--color-white);
+}
+
+.footer_top {
+  display: flex;
+  justify-content: center;
+  padding: 27px 0;
+  border-bottom: 1px solid var(--color-gray-400);
+}
+
+.footer_links {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.footer_link {
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--color-white);
+  padding: 10px;
+}
+
+.footer_link_divider {
+  width: 1px;
+  height: 17px;
+  background: var(--color-gray-400);
+}
+
+.footer_main {
+  display: flex;
+  justify-content: center;
+  padding: 58px 40px;
+  border-bottom: 1px solid var(--color-gray-400);
+}
+
+.footer_center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  text-align: center;
+}
+
+.footer_service {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+  font-weight: 700;
+}
+
+.footer_service_label,
+.footer_service_phone {
+  font-size: 28px;
+}
+
+.footer_info_txt {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 2.31;
+}
+
+.footer_bottom {
+  padding: 19px 40px;
+}
+
+.footer_logo_row {
+  max-width: none;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  /* Figma 실측은 고정 gap:326px이지만, 좁은 모바일 폭(768px 미만 포함)에서
+     가로 스크롤이 생기지 않도록 태블릿/데스크톱과 동일하게 space-between으로 대체 */
+  justify-content: space-between;
+}
+
+.footer_logo_main {
+  width: 161px;
+  height: 23px;
+  object-fit: contain;
+}
+
+.footer_logo_right {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+.footer_logo_lottery {
+  width: 105px; /* Figma 실측: 태블릿/데스크톱(117×41)과 달리 105×23 */
+  height: 23px;
+  object-fit: contain;
+}
+
+.footer_logo_wa {
+  width: 86px;
+  height: 63px;
+  object-fit: contain;
 }
 
 /* --------------------------------------------------------------------------
    8. 반응형 브레이크포인트 — 섹션 스타일은 이후 여기에 추가
    -------------------------------------------------------------------------- */
 @media (min-width: 1024px) {
+  /* 모바일 헤더 변경이 태블릿 이상에 영향을 주지 않도록 기존 레이아웃을 유지한다. */
+  .header {
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    backdrop-filter: blur(5.65px);
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .header_inner {
+    padding: 16px 24px;
+  }
+
+  .header_logo_icon {
+    height: auto;
+  }
+
+  .header_ham_btn,
+  .header_ham_icon {
+    width: 44px;
+    height: 44px;
+  }
+
   /* 태블릿(768px) 이상 — main_hero: 풀블리드(카드 처리 없음), 슬라이드 757px */
   .hero_slider {
     margin: 0;
@@ -814,6 +1586,7 @@ svg {
     padding: 25px;
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
     justify-content: center;
     overflow: hidden;
   }
@@ -956,6 +1729,7 @@ svg {
     display: flex;
     gap: 60px;
     overflow-x: auto; /* Figma 실측: 카드 3개(418px×3+gap)가 1024px 폭보다 넓어 가로 스크롤 구조 */
+    margin-right: -60px; /* merchant_inner 우측 패딩(60px) 상쇄 — 카드 스크롤을 화면 오른쪽 끝까지 열어 답답함 해소(왼쪽 60px 정렬은 유지) */
   }
 
   .merchant_tablet_card {
@@ -979,6 +1753,7 @@ svg {
     left: 0;
     right: 0;
     bottom: 0;
+    height: 145px; /* Figma 실측(node 1:1140): 흰색 info 영역 고정 높이 — 주소 줄 수와 무관하게 3카드 동일 */
     display: flex;
     flex-direction: column;
     gap: 18px;
@@ -990,6 +1765,8 @@ svg {
     display: flex;
     align-items: center;
     gap: 10px;
+    line-height: 1; /* Figma 실측(node 1:1141): leading-none — info 145px 높이에 맞게 촘촘 */
+    padding: 1px 0; /* Figma 실측: py-px */
   }
 
   .merchant_tablet_card_name {
@@ -1020,12 +1797,13 @@ svg {
 
   .merchant_tablet_card_phone {
     align-items: center; /* Figma 실측: 전화번호는 한 줄이라 center */
+    line-height: 1; /* Figma 실측(node 1:1149): leading-none */
     font-weight: 500;
     color: var(--color-shop-phone-text);
   }
 
   .merchant_tablet_card_address {
-    align-items: flex-start; /* Figma 실측: 주소는 2줄로 줄바꿈돼서 top 정렬 */
+    align-items: center; /* Figma 실측: 주소는 1줄(넘치면 말줄임)이라 center 정렬 */
     line-height: 1.3;
     font-weight: 400;
     color: var(--color-shop-address-text);
@@ -1097,6 +1875,7 @@ svg {
   .how_inner {
     max-width: none;
     margin: 0;
+    padding: 0 0 0 60px; /* Figma 실측: merchant_inner와 동일하게 좌측 60px, 제목·카드 공통 (카드는 오른쪽으로 스크롤 유지) */
     display: flex;
     flex-direction: column;
     gap: 36px;
@@ -1106,7 +1885,7 @@ svg {
     display: flex;
     flex-direction: column;
     gap: 70px;
-    padding: 0 40px; /* 카드 리스트(.how_steps)는 화면 끝까지 꽉 차게, 제목/탭만 여백 유지 */
+    padding: 0;
   }
 
   .how_tit {
@@ -1317,17 +2096,24 @@ svg {
     display: flex;
     flex-direction: column;
     gap: 22px;
+    border-top: none;
+    border-bottom: none;
+    padding: 0;
   }
 
   .event_item_date {
     font-size: 20px;
+    line-height: normal;
     color: var(--color-gray-500);
+    margin-bottom: 0;
   }
 
   .event_item_title {
     font-size: 24px;
     font-weight: 500;
+    line-height: normal;
     color: var(--color-gray-500);
+    margin-bottom: 0;
   }
 
   .event_item_chips {
@@ -1496,6 +2282,7 @@ svg {
   .footer_center {
     display: flex;
     flex-direction: column;
+    align-items: stretch;
     gap: 18px;
     text-align: left;
   }
@@ -1888,6 +2675,7 @@ svg {
   .quickmenu_list {
     display: flex;
     gap: 70px;
+    height: auto;
   }
 
   .quickmenu_card {
@@ -1899,6 +2687,7 @@ svg {
     padding: 0 40px;
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
     justify-content: center;
     gap: 180px;
     overflow: hidden;
@@ -1979,6 +2768,7 @@ svg {
      ======================================================================== */
   .merchant_section {
     background-color: var(--color-shop-section-bg);
+    padding: 0;
   }
 
   .merchant_inner {
@@ -1994,6 +2784,7 @@ svg {
     display: flex;
     flex-direction: column;
     gap: 8px;
+    margin-bottom: 0;
   }
 
   .merchant_subtit {
@@ -2024,6 +2815,7 @@ svg {
 
   .merchant_contents {
     display: flex;
+    flex-direction: row;
     gap: 30px;
     align-items: center;
     justify-content: center;
@@ -2032,7 +2824,9 @@ svg {
   .merchant_categories {
     display: flex;
     flex-direction: column;
+    justify-content: flex-start;
     gap: 40px;
+    margin-bottom: 0;
   }
 
   .merchant_category_btn {
@@ -2334,6 +3128,7 @@ svg {
     align-items: center;
     padding: 30px 0 30px 360px;
     overflow: hidden;
+    top:
   }
 
   .promo_banner_txt {
@@ -2351,7 +3146,7 @@ svg {
   }
 
   .promo_banner_tit {
-    font-size: 32px;
+    font-size: 43px;
     font-weight: 600;
     line-height: 1; /* Figma: leading-none */
     color: var(--color-banner-yellow);
@@ -2360,8 +3155,8 @@ svg {
 
   .promo_banner_icon {
     position: absolute;
-    left: 1082.5px;
-    top: -10px;
+    left: 1070px;
+    top: 1px;
     width: 397px;
     height: 223px;
     object-fit: cover;
@@ -2378,6 +3173,7 @@ svg {
   .how_inner {
     max-width: var(--content-max-width);
     margin: 0 auto;
+    padding: 0;
     display: flex;
     flex-direction: column;
     gap: 36px;
@@ -2387,6 +3183,7 @@ svg {
     display: flex;
     flex-direction: column;
     gap: 50px;
+    padding: 0;
   }
 
   .how_tit {
@@ -2422,6 +3219,12 @@ svg {
   .how_steps {
     display: flex;
     gap: 61px;
+    /* .how_inner(1400px, 중앙 정렬) 밖으로 뷰포트 오른쪽 끝까지 폭을 늘려서
+       4번째 카드가 잘리지 않고 미리보기로 보이면서도, 실제 스크롤 컨테이너라
+       드래그하면 5번째 카드까지 이어서 볼 수 있음. 50vw + 700px = 뷰포트 우측 끝
+       - 콘텐츠 좌측 시작점(50vw - 700px, content-max-width:1400px 중앙정렬 기준) */
+    width: calc(50vw + 700px);
+    overflow-x: auto;
   }
 
   .how_step {
@@ -2608,6 +3411,8 @@ svg {
   }
 
   .event_tab_btn {
+    width: auto;
+    padding: 0;
     font-size: 38px;
     font-weight: 500;
     color: var(--color-gray-300);
@@ -2616,6 +3421,7 @@ svg {
   .event_tab_btn.is_active {
     font-weight: 700;
     color: var(--color-primary-400);
+    border-bottom: none;
   }
 
   .event_more_link {
@@ -2633,6 +3439,7 @@ svg {
   .event_list {
     display: flex;
     flex-direction: column;
+    gap: 0;
     width: 780px;
   }
 
@@ -2641,6 +3448,7 @@ svg {
     gap: 77px;
     align-items: center;
     height: 270px;
+    padding: 0;
     border-bottom: 1px solid var(--color-gray-500);
   }
 
@@ -2652,10 +3460,15 @@ svg {
     width: 423px;
     display: flex;
     flex-direction: column;
+    gap: 0;
+    border-top: none;
+    border-bottom: none;
+    padding: 0;
   }
 
   .event_item_date {
     font-size: 20px;
+    line-height: normal;
     color: var(--color-gray-500);
     margin-bottom: 23px;
   }
@@ -2663,6 +3476,7 @@ svg {
   .event_item_title {
     font-size: 28px;
     font-weight: 500;
+    line-height: normal;
     color: var(--color-gray-500);
     margin-bottom: 36px;
     white-space: nowrap;
@@ -2722,6 +3536,7 @@ svg {
   }
 
   .help_inner {
+    width: auto;
     max-width: 768px;
     margin: 0 auto;
     display: flex;
@@ -2776,6 +3591,9 @@ svg {
   .help_chips {
     display: flex;
     gap: 13px;
+    align-self: flex-start;
+    width: auto;
+    margin-top: 27px;
   }
 
   .help_chip {
@@ -2828,20 +3646,25 @@ svg {
   }
 
   .footer_main {
+    display: block; /* 기본 규칙의 display:flex 상속을 해제 — footer_center의 max-width+margin:auto가 로고와 왼쪽 끝을 맞추도록 */
     padding: 58px 0;
-    display: flex;
-    justify-content: center;
     border-bottom: 1px solid var(--color-gray-400);
   }
 
   .footer_center {
-    text-align: center;
+    max-width: var(--content-max-width); /* footer_logo_row와 동일한 기준(block + max-width + margin:auto)으로 왼쪽 끝을 맞춤 */
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    text-align: left;
   }
 
   .footer_service {
     display: flex;
     align-items: baseline;
-    justify-content: center;
+    justify-content: flex-start;
     gap: 30px;
     font-weight: 700;
     margin-bottom: 80px;

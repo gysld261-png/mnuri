@@ -38,9 +38,11 @@
         </div>
 
         <button type="button" class="header_ham_btn" id="header_ham_btn" aria-label="전체메뉴 열기" aria-expanded="false" aria-controls="header_menu_panel">
-          <span class="header_ham_line"></span>
-          <span class="header_ham_line"></span>
-          <span class="header_ham_line"></span>
+          <picture>
+            <!-- 1024px 이상: 히어로 위 반투명 헤더 → 흰색 아이콘 / 모바일: 흰 배경 → 회색 아이콘 -->
+            <source media="(min-width: 1024px)" srcset="./asset/ham_pc.svg">
+            <img src="./asset/menu.svg" alt="" class="header_ham_icon">
+          </picture>
         </button>
       </div>
     </div>
@@ -158,7 +160,7 @@
                 <p class="hero_slide_tit"><strong>우리 동네 가맹점,</strong> 지도로 한눈에!</p>
               </div>
               <a href="#merchant-section" class="hero_more_link">
-                내 주변 사용처 찾기
+                자세히 보러가기
                 <img src="./asset/arrow.svg" alt="" class="hero_more_icon">
               </a>
             </div>
@@ -172,7 +174,7 @@
                 <p class="hero_slide_tit"><strong>지금 진행 중인 이벤트를 확인해보세요!</strong></p>
               </div>
               <a href="#" class="hero_more_link">
-                이벤트 보러가기
+                자세히 보러가기
                 <img src="./asset/arrow.svg" alt="" class="hero_more_icon">
               </a>
             </div>
@@ -415,14 +417,16 @@
                     <span class="merchant_tablet_card_category">만화방</span>
                     <span class="merchant_tablet_card_distance">도보 2분</span>
                   </div>
-                  <p class="merchant_tablet_card_phone">
-                    <img src="./asset/phone.svg" alt="" class="icon_phone">
-                    02-558-5846
-                  </p>
-                  <p class="merchant_tablet_card_address">
-                    <img src="./asset/address.svg" alt="" class="icon_location">
-                    서울 강남구 강남대로98길 17 1층 놀숲 강남역점
-                  </p>
+                  <div class="merchant_tablet_card_bottom">
+                    <p class="merchant_tablet_card_phone">
+                      <img src="./asset/phone.svg" alt="" class="icon_phone">
+                      02-558-5846
+                    </p>
+                    <p class="merchant_tablet_card_address">
+                      <img src="./asset/address.svg" alt="" class="icon_location">
+                      <span class="merchant_tablet_card_address_txt">서울 강남구 강남대로98길 17 1층 놀숲 강남역점</span>
+                    </p>
+                  </div>
                 </div>
               </li>
               <li class="merchant_tablet_card">
@@ -433,14 +437,16 @@
                     <span class="merchant_tablet_card_category">서점</span>
                     <span class="merchant_tablet_card_distance">도보 7분</span>
                   </div>
-                  <p class="merchant_tablet_card_phone">
-                    <img src="./asset/phone.svg" alt="" class="icon_phone">
-                    1544-1900
-                  </p>
-                  <p class="merchant_tablet_card_address">
-                    <img src="./asset/address.svg" alt="" class="icon_location">
-                    서울 서초구 강남대로 465 교보타워 지하1층~지하2층
-                  </p>
+                  <div class="merchant_tablet_card_bottom">
+                    <p class="merchant_tablet_card_phone">
+                      <img src="./asset/phone.svg" alt="" class="icon_phone">
+                      1544-1900
+                    </p>
+                    <p class="merchant_tablet_card_address">
+                      <img src="./asset/address.svg" alt="" class="icon_location">
+                      <span class="merchant_tablet_card_address_txt">서울 서초구 강남대로 465 교보타워 지하1층~지하2층</span>
+                    </p>
+                  </div>
                 </div>
               </li>
               <li class="merchant_tablet_card">
@@ -451,14 +457,16 @@
                     <span class="merchant_tablet_card_category">서점</span>
                     <span class="merchant_tablet_card_distance">도보 10분</span>
                   </div>
-                  <p class="merchant_tablet_card_phone">
-                    <img src="./asset/phone.svg" alt="" class="icon_phone">
-                    1544-1900
-                  </p>
-                  <p class="merchant_tablet_card_address">
-                    <img src="./asset/address.svg" alt="" class="icon_location">
-                    서울 서초구 강남대로 465 교보타워 지하1층~지하2층
-                  </p>
+                  <div class="merchant_tablet_card_bottom">
+                    <p class="merchant_tablet_card_phone">
+                      <img src="./asset/phone.svg" alt="" class="icon_phone">
+                      1544-1900
+                    </p>
+                    <p class="merchant_tablet_card_address">
+                      <img src="./asset/address.svg" alt="" class="icon_location">
+                      <span class="merchant_tablet_card_address_txt">서울 서초구 강남대로 465 교보타워 지하1층~지하2층</span>
+                    </p>
+                  </div>
                 </div>
               </li>
             </ul>
