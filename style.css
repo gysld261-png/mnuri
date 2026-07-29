@@ -1552,7 +1552,7 @@ svg {
   /* --- Quick Menu (Figma: card, node 1:1079) ---
      구조 차이: 2x2 그리드(3번째 카드가 2열 병합), "자세히 보기" 링크·배경 장식 이미지 없음 */
   .quickmenu_section {
-    padding: 50px 132px 70px;
+    padding: 0 132px 100px;
   }
 
   .quickmenu_inner {
