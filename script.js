@@ -6,8 +6,11 @@
 document.addEventListener('DOMContentLoaded', () => {
   initHeroSlider();
   initHeader();
+  initHeaderScrollBehavior();
+  initHeaderMenuAccordion();
   initMerchantSection();
   initHowTabs();
+  initStepCards();
   initEventTabs();
   initHelpSearch();
 });
@@ -127,9 +130,10 @@ function initMerchantMapButtons() {
    -------------------------------------------------------------------------- */
 function initHowTabs() {
   const tabButtons = document.querySelectorAll('.how_tab_btn');
-  const panels = document.querySelectorAll('.how_panel');
   if (!tabButtons.length) return;
 
+  // 온라인 신청 탭 콘텐츠가 아직 없어서(Figma 미확정), 탭 버튼의 선택 표시만 토글하고
+  // 카드 패널은 전환하지 않음(항상 방문 신청 5단계 카드가 보이는 상태 유지)
   tabButtons.forEach((btn) => {
     btn.addEventListener('click', () => {
       tabButtons.forEach((b) => {
@@ -138,12 +142,27 @@ function initHowTabs() {
       });
       btn.classList.add('is_active');
       btn.setAttribute('aria-selected', 'true');
-
-      panels.forEach((panel) => {
-        panel.hidden = panel.dataset.panel !== btn.dataset.tab;
-        panel.classList.toggle('is_active', panel.dataset.panel === btn.dataset.tab);
-      });
     });
+  });
+}
+
+/* --------------------------------------------------------------------------
+   3-1-1. Step Card Selection (Figma엔 없는 UX 개선 — 클릭한 카드만 활성화)
+   기본값은 1번 카드가 활성화된 상태로 시작(HTML의 is_active 클래스 그대로 사용).
+   -------------------------------------------------------------------------- */
+function initStepCards() {
+  const stepCards = document.querySelectorAll('.how_step');
+  stepCards.forEach((card) => {
+    card.addEventListener('click', () => handleStepCardClick(card));
+  });
+}
+
+function handleStepCardClick(cardEl) {
+  const stepCards = cardEl.closest('.how_steps').querySelectorAll('.how_step');
+  stepCards.forEach((card) => {
+    const isTarget = card === cardEl;
+    card.classList.toggle('is_active', isTarget);
+    card.setAttribute('aria-pressed', String(isTarget));
   });
 }
 
@@ -183,9 +202,6 @@ function initHelpSearch() {
   if (form && input) {
     form.addEventListener('submit', (e) => {
       e.preventDefault();
-      if (input.value.trim() === '') return;
-      askChatbot(input.value.trim());
-      input.value = '';
     });
   }
 
@@ -205,12 +221,17 @@ function initHeader() {
   const hamBtn = document.getElementById('header_ham_btn');
   const closeBtn = document.getElementById('header_menu_close_btn');
   const menuPanel = document.getElementById('header_menu_panel');
+  const menuDim = document.getElementById('header_menu_dim');
   const largeTextToggle = document.getElementById('large_text_toggle');
   const merchantModeToggle = document.getElementById('merchant_mode_toggle');
 
   if (hamBtn && closeBtn && menuPanel && header) {
     hamBtn.addEventListener('click', () => handleHeaderMenuToggle(header, hamBtn, menuPanel, true));
     closeBtn.addEventListener('click', () => handleHeaderMenuToggle(header, hamBtn, menuPanel, false));
+
+    if (menuDim) {
+      menuDim.addEventListener('click', () => handleHeaderMenuToggle(header, hamBtn, menuPanel, false));
+    }
   }
 
   if (largeTextToggle) {
@@ -222,10 +243,64 @@ function initHeader() {
   }
 }
 
+/* 태블릿/모바일은 패널이 position:fixed 슬라이드 애니메이션(transition)을 타므로,
+   hidden 속성을 애니메이션 전후로 지연시켜야 자연스럽게 재생됨.
+   데스크톱은 transition이 없어(0s) 기존처럼 즉시 전환됨 — CSS transition-duration을
+   그대로 읽어와 판단하므로 브레이크포인트를 JS에 하드코딩하지 않음. */
 function handleHeaderMenuToggle(header, hamBtn, menuPanel, isOpen) {
-  header.classList.toggle('is_menu_open', isOpen);
-  menuPanel.hidden = !isOpen;
   hamBtn.setAttribute('aria-expanded', String(isOpen));
+
+  if (isOpen) {
+    menuPanel.hidden = false;
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        header.classList.add('is_menu_open');
+      });
+    });
+  } else {
+    header.classList.remove('is_menu_open');
+    const durationSec = parseFloat(getComputedStyle(menuPanel).transitionDuration) || 0;
+    if (durationSec > 0) {
+      window.setTimeout(() => {
+        menuPanel.hidden = true;
+      }, durationSec * 1000);
+    } else {
+      menuPanel.hidden = true;
+    }
+  }
+}
+
+/* Figma엔 없는 UX 개선 — 데스크톱(1920px↑) 전용 스크롤 방향 감지 헤더 숨김/노출.
+   CSS(.header.is_hidden)가 1920px 미만에서는 아무 효과가 없으므로,
+   태블릿/모바일(햄버거+오버레이 구조)은 이 로직이 실행돼도 화면엔 영향 없음. */
+function initHeaderScrollBehavior() {
+  const header = document.getElementById('site_header');
+  if (!header) return;
+
+  let lastScrollY = window.scrollY;
+  let ticking = false;
+
+  function updateHeaderVisibility() {
+    const currentScrollY = window.scrollY;
+
+    if (currentScrollY <= 0) {
+      header.classList.remove('is_hidden');
+    } else if (currentScrollY > lastScrollY) {
+      header.classList.add('is_hidden');
+    } else if (currentScrollY < lastScrollY) {
+      header.classList.remove('is_hidden');
+    }
+
+    lastScrollY = currentScrollY;
+    ticking = false;
+  }
+
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      requestAnimationFrame(updateHeaderVisibility);
+      ticking = true;
+    }
+  });
 }
 
 function handleHeaderToggleClick(toggleEl) {
@@ -234,61 +309,26 @@ function handleHeaderToggleClick(toggleEl) {
 }
 
 /* --------------------------------------------------------------------------
-   5. Chatbot Modal & Messaging
+   4-1. 전체메뉴 카테고리 아코디언 (Figma엔 없는 UX 개선 추가 — design-analysis.md 기록)
+   태블릿/모바일: 클릭한 카테고리만 펼침/접힘 토글, 여러 개 동시 펼침 가능.
+   데스크톱(1024px↑)은 CSS에서 항상 펼침으로 고정되므로 이 로직과 무관하게 항상 보임.
    -------------------------------------------------------------------------- */
-function toggleChatbotModal() {
-  const modal = document.getElementById('chatbotModal');
-  if (modal) {
-    modal.classList.toggle('open');
-  }
-}
-
-function openChatbotModal() {
-  const modal = document.getElementById('chatbotModal');
-  if (modal) {
-    modal.classList.add('open');
-  }
-}
-
-function handleChatSubmit(e) {
-  if (e.key === 'Enter' && e.target.value.trim() !== '') {
-    askChatbot(e.target.value.trim());
-    e.target.value = '';
-  }
-}
-
-function askChatbot(questionText) {
-  const chatMessages = document.getElementById('chatMessages');
-  if (!chatMessages) return;
-
-  openChatbotModal();
-
-  // Add User Message
-  const userBubble = document.createElement('div');
-  userBubble.className = 'chat-msg user-msg';
-  userBubble.innerHTML = `<p>${questionText}</p>`;
-  chatMessages.appendChild(userBubble);
-
-  // Generate AI Response after slight delay
-  setTimeout(() => {
-    const botBubble = document.createElement('div');
-    botBubble.className = 'chat-msg bot-msg';
-    
-    let answerText = '궁금하신 사항에 대해 안내 도와드리겠습니다. 추가 문의사항은 1544-3412로 전화 부탁드립니다.';
-    if (questionText.includes('분실')) {
-      answerText = '카드를 분실하셨군요! [카드 확인] > [분실신고 및 재발급] 메뉴에서 즉시 신고 및 재발급 신청을 하실 수 있습니다.';
-    } else if (questionText.includes('사용') || questionText.includes('가맹점')) {
-      answerText = '문화누리카드는 전국 공연장, 영화관, 서점, 음반판매점, 놀이공원, 국내 여행사, 체육시설 등에서 사용하실 수 있습니다.';
-    } else if (questionText.includes('양도')) {
-      answerText = '문화누리카드는 본인 전용 카드로 타인 양도 및 매매가 금지되어 있습니다.';
+function initHeaderMenuAccordion() {
+  const groups = document.querySelectorAll('.header_menu_group');
+  groups.forEach((group) => {
+    const titBtn = group.querySelector('.header_menu_group_tit');
+    if (titBtn) {
+      titBtn.addEventListener('click', () => handleAccordionToggle(group));
     }
+  });
+}
 
-    botBubble.innerHTML = `<p>${answerText}</p>`;
-    chatMessages.appendChild(botBubble);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-  }, 400);
-
-  chatMessages.scrollTop = chatMessages.scrollHeight;
+function handleAccordionToggle(groupEl) {
+  const isOpen = groupEl.classList.toggle('is_open');
+  const titBtn = groupEl.querySelector('.header_menu_group_tit');
+  if (titBtn) {
+    titBtn.setAttribute('aria-expanded', String(isOpen));
+  }
 }
 
 /* --------------------------------------------------------------------------

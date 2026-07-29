@@ -64,10 +64,10 @@
   /* --------------------------------------------------------------------
      3. 반응형 브레이크포인트 변수 (참고/문서화용)
      CSS는 @media 조건절에서 var()를 지원하지 않으므로, 실제 미디어쿼리는
-     아래와 동일한 리터럴 값(768px / 1024px)을 직접 사용해야 합니다.
+     아래와 동일한 리터럴 값(1024px / 1920px)을 직접 사용해야 합니다.
      -------------------------------------------------------------------- */
-  --bp-tablet: 768px;
-  --bp-desktop: 1024px;
+  --bp-tablet: 1024px;
+  --bp-desktop: 1920px;
 }
 
 /* --------------------------------------------------------------------------
@@ -118,7 +118,11 @@ ol {
   list-style: none;
 }
 
-a {
+a,
+a:where(:visited) {
+  /* :where()로 감싸서 명시도를 0으로 만듦 — a:visited{color:purple} 같은 브라우저 기본
+     스타일을 덮어쓰되, .quickmenu_card_more{color:white} 같은 개별 컴포넌트 클래스 규칙보다
+     명시도가 낮아야 해서 이렇게 처리(안 그러면 방문한 링크가 컴포넌트 색을 못 이김) */
   color: inherit;
   text-decoration: none;
 }
@@ -193,6 +197,22 @@ svg {
   font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
 }
 
+/* 가맹점 리스트 전화/주소 아이콘 (asset/phone.svg, asset/address.svg — Figma 실측 비율, 데스크톱·태블릿 공통) */
+.icon_phone,
+.icon_location {
+  flex-shrink: 0;
+}
+
+.icon_phone {
+  width: 15px;
+  height: 15px;
+}
+
+.icon_location {
+  width: 13px;
+  height: 16px;
+}
+
 /* ==========================================================================
    6. Header (Figma: Component 4, off/on 2 states)
    이번 턴은 PC(1024px 이상) 값만 정확히 반영. 태블릿/모바일은 기능만 동작하는
@@ -257,12 +277,64 @@ svg {
   width: 22px;
   height: 2px;
   background-color: var(--color-white);
+  transition: transform 0.3s ease, opacity 0.3s ease;
 }
 
-/* Figma: 속성1=on — 전체메뉴 오버레이 패널 */
+/* Figma엔 없는 UX 개선 — 태블릿/모바일 전용 햄버거→X 모션(design-analysis.md 기록 대상) */
+.header.is_menu_open .header_ham_line:nth-child(1) {
+  transform: translateY(8px) rotate(45deg);
+}
+
+.header.is_menu_open .header_ham_line:nth-child(2) {
+  opacity: 0;
+}
+
+.header.is_menu_open .header_ham_line:nth-child(3) {
+  transform: translateY(-8px) rotate(-45deg);
+}
+
+/* Figma엔 없는 UX 개선 — 태블릿/모바일 전용 딤(dim) 배경(design-analysis.md 기록 대상) */
+.header_menu_dim {
+  position: fixed;
+  /* inset:0 대신 명시적 vw/vh 사용: .header에 backdrop-filter가 있어서
+     fixed 자손의 containing block이 뷰포트가 아닌 .header 박스(얇은 헤더바 높이)로
+     바뀌는 문제(CSS 스펙 동작) 때문에, inset:0으로는 헤더 높이만큼만 덮임.
+     vw/vh는 containing block과 무관하게 항상 실제 뷰포트 기준이라 우회 가능. */
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 150;
+  background-color: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease-out, visibility 0.3s ease-out;
+}
+
+.header.is_menu_open .header_menu_dim {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Figma: 속성1=on/nav — 전체메뉴 오버레이 패널
+   태블릿/모바일: Figma엔 없는 UX 개선 — 오른쪽에서 슬라이드 인하는 사이드 드로어로 전환
+   (design-analysis.md 기록 대상). 1920px 데스크톱은 아래에서 원래 동작으로 복원. */
 .header_menu_panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 200;
+  width: min(70%, 560px);
+  height: 100vh;
+  overflow-y: auto;
   background-color: var(--color-white);
   padding: 24px;
+  transform: translateX(100%);
+  transition: transform 0.3s ease-out;
+}
+
+.header.is_menu_open .header_menu_panel {
+  transform: translateX(0);
 }
 
 .header_menu_top {
@@ -272,8 +344,34 @@ svg {
   margin-bottom: 32px;
 }
 
+/* 데스크톱 메가메뉴 전용 로고 (태블릿/모바일은 숨김, home+로그인으로 대체) */
+.header_menu_top .header_logo {
+  display: none;
+}
+
 .header_logo_txt_dark {
   color: var(--color-primary-400);
+}
+
+/* 태블릿/모바일 전용: home 아이콘 + 로그인 버튼 (Figma: 속성1=tab,속성2=nav 상단행) */
+.header_menu_top_left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.header_menu_home_icon {
+  width: 40px;
+  height: 40px;
+}
+
+.header_menu_login_btn {
+  padding: 8px 16px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-primary-400);
+  border: 1px solid var(--color-primary-400);
+  border-radius: 15px;
 }
 
 .header_menu_close {
@@ -289,7 +387,9 @@ svg {
   height: 100%;
 }
 
+/* 데스크톱 전용 타이틀 ("전체메뉴") — 태블릿/모바일 Figma엔 없음 */
 .header_menu_tit {
+  display: none;
   font-size: 24px;
   font-weight: 600;
   color: var(--color-gray-500);
@@ -299,26 +399,67 @@ svg {
 .header_menu_grid {
   display: flex;
   flex-direction: column;
-  gap: 32px;
 }
 
+.header_menu_group {
+  border-bottom: 1px solid var(--color-gray-200);
+  padding: 20px 0;
+}
+
+/* 아코디언 타이틀 버튼 (Figma엔 없는 접기/펼치기 UX 개선 — design-analysis.md 기록) */
 .header_menu_group_tit {
-  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  font-size: 32px;
   font-weight: 600;
   color: var(--color-gray-500);
-  margin-bottom: 16px;
+  text-align: left;
+}
+
+.header_menu_group_arrow {
+  flex-shrink: 0;
+  color: var(--color-gray-500);
+  transition: transform 0.2s ease;
+}
+
+.header_menu_group.is_open .header_menu_group_arrow {
+  transform: rotate(180deg);
+}
+
+/* height:auto는 transition이 안 걸려서, grid-template-rows 0fr→1fr 기법으로 부드러운 펼침 구현 */
+.header_menu_group_list_wrap {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s ease;
 }
 
 .header_menu_group_list {
+  min-height: 0;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
+.header_menu_group.is_open .header_menu_group_list_wrap {
+  grid-template-rows: 1fr;
+}
+
+.header_menu_group.is_open .header_menu_group_list {
+  padding-top: 16px;
+}
+
 .header_menu_group_list a {
-  font-size: 15px;
-  font-weight: 500;
-  color: var(--color-gray-500);
+  font-size: 24px;
+  font-weight: 400;
+  color: var(--color-gray-400);
+  transition: color 0.2s ease;
+}
+
+.header_menu_group_list a:hover {
+  color: var(--color-primary-400);
 }
 
 /* ==========================================================================
@@ -458,7 +599,7 @@ svg {
   justify-content: center;
   gap: 50px;
   height: 375px; /* Figma 실측(login, mobile/tablet 공통 고정값) */
-  margin: 0 40px;
+  margin: 55px 40px; /* Figma 실측: login 섹션(485px) - 카드(375px) = 위아래 55px */
   padding: 0; /* Figma 실측: mobile/tablet은 padding 지정 없음 */
   background-color: var(--color-login-card-bg);
   border-radius: 15px;
@@ -530,9 +671,83 @@ svg {
 }
 
 /* --------------------------------------------------------------------------
+   7-1. Promotion Banner — 모바일(768px, base) 기준 (Figma: banner, node 1:650)
+   태블릿(node 1:1184)과 수치가 달라 base 전용으로 별도 작성.
+   -------------------------------------------------------------------------- */
+.promo_banner_section {
+  padding: 65px 0;
+}
+
+.promo_banner_inner {
+  position: relative;
+  height: 120px;
+  padding-left: 70px;
+  padding-right: 219px; /* 아이콘 영역(width 195 + right 24) 만큼 미리 비워서 텍스트와 안 겹치게 함 */
+  background-color: var(--color-banner-purple);
+  overflow: hidden; /* Figma: container에 overflow-clip 적용 */
+  display: flex;
+  align-items: center;
+}
+
+.promo_banner_txt {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.promo_banner_subtit {
+  font-size: 24px;
+  font-weight: 300;
+  line-height: 1; /* Figma: leading-none */
+  color: var(--color-white);
+  letter-spacing: -0.48px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.promo_banner_tit {
+  font-size: 32px;
+  font-weight: 600;
+  line-height: 1; /* Figma: leading-none */
+  color: var(--color-banner-yellow);
+  letter-spacing: -0.64px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.promo_banner_icon {
+  position: absolute;
+  width: 195px;
+  height: 109px;
+  right: 24px; /* Figma 실측: left:549px 대신 컨테이너 우측 기준(768-549-195) 값으로 전환 */
+  top: 27px;
+  object-fit: contain;
+}
+
+/* Figma엔 없는 UX 개선 — quickmenu 카드 호버 확대(design-analysis.md 기록 대상).
+   브레이크포인트가 아니라 실제 마우스 호버가 가능한 입력장치(hover:hover, pointer:fine)
+   기준으로 적용 — 터치 전용 기기에서는 자동으로 빠짐(모바일/터치 태블릿 제외, 데스크톱
+   및 마우스가 연결된 태블릿에는 동일하게 적용됨). 카드 컨테이너 자체를 scale해서
+   배경색+텍스트+아이콘이 항상 같이, 비율 그대로 확대됨(내부 요소 개별 확대 아님). */
+@media (hover: hover) and (pointer: fine) {
+  .quickmenu_card {
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .quickmenu_card:hover {
+    transform: scale(1.04);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    z-index: 1; /* 확대 시 옆 카드에 가리지 않도록 */
+  }
+}
+
+/* --------------------------------------------------------------------------
    8. 반응형 브레이크포인트 — 섹션 스타일은 이후 여기에 추가
    -------------------------------------------------------------------------- */
-@media (min-width: 768px) {
+@media (min-width: 1024px) {
   /* 태블릿(768px) 이상 — main_hero: 풀블리드(카드 처리 없음), 슬라이드 757px */
   .hero_slider {
     margin: 0;
@@ -554,11 +769,819 @@ svg {
   }
 
   .balance_card {
-    margin: 0 132px;
+    margin: 80px 132px; /* Figma 실측: login 섹션(535px) - 카드(375px) = 위아래 80px */
+  }
+
+  /* ========================================================================
+     태블릿(768px) 전용 섹션 스타일 — 이전까지 데스크톱(1024px) 값만 있던 섹션들.
+     구조가 크게 다른 곳(가맹점찾기/이벤트/FAQ)은 주석으로 표시.
+     ======================================================================== */
+
+  /* --- Quick Menu (Figma: card, node 1:1079) ---
+     구조 차이: 2x2 그리드(3번째 카드가 2열 병합), "자세히 보기" 링크·배경 장식 이미지 없음 */
+  .quickmenu_section {
+    padding: 50px 132px 70px;
+  }
+
+  .quickmenu_inner {
+    max-width: none;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 50px;
+  }
+
+  .quickmenu_tit {
+    font-size: 44px;
+    font-weight: 700;
+    color: var(--color-gray-500);
+  }
+
+  .quickmenu_list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 30px;
+    height: 418px;
+  }
+
+  .quickmenu_card {
+    position: relative;
+    width: auto;
+    height: auto;
+    border-radius: 15px;
+    box-shadow: var(--shadow-quickmenu);
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .quickmenu_card_blue { background-color: var(--color-primary-400); }
+  .quickmenu_card_green { background-color: var(--color-secondary-green-400); }
+  .quickmenu_card_lightblue { background-color: var(--color-primary-300); }
+
+  .quickmenu_card_lightblue {
+    grid-column: 1 / -1;
+  }
+
+  .quickmenu_card_txt {
+    display: flex;
+    flex-direction: column;
+    gap: 45px;
+  }
+
+  .quickmenu_card_tit {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--color-white);
+    line-height: 1;
+  }
+
+  .quickmenu_card_desc {
+    font-size: 24px;
+    font-weight: 500;
+    color: var(--color-white);
+    line-height: 1.3;
+  }
+
+  /* Figma: 태블릿 카드엔 "자세히 보기" 링크·배경 장식 이미지가 없음 */
+  .quickmenu_card_more,
+  .quickmenu_card_deco {
+    display: none;
+  }
+
+  /* --- Merchant Finder (Figma: shop, node 1:1102) ---
+     구조 차이: 검색/지역선택/지도 없이 카테고리 아이콘(가로 1줄) + 사진 카드 3개만 존재 */
+  .merchant_section {
+    background-color: #efefef;
+    padding: 80px 0 100px;
+  }
+
+  .merchant_inner {
+    padding: 0 60px;
+  }
+
+  .merchant_tit_group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 58px;
+  }
+
+  .merchant_subtit {
+    font-size: 32px;
+    font-weight: 300;
+    color: var(--color-gray-400);
+  }
+
+  .merchant_tit {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    font-size: 44px;
+    font-weight: 700;
+    color: var(--color-gray-500);
+  }
+
+  .merchant_tit_arrow {
+    font-size: 50px;
+    color: var(--color-gray-500);
+  }
+
+  .merchant_bottom {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .merchant_categories {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 35px;
+    margin-bottom: 58px;
+  }
+
+  .merchant_category_btn {
+    width: 101px;
+    height: 101px;
+    border-radius: 15px;
+    background: var(--color-white);
+    box-shadow: var(--shadow-icon);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+  }
+
+  .merchant_category_icon {
+    font-size: 40px;
+    color: var(--color-primary-400);
+  }
+
+  .merchant_category_label {
+    font-size: 18px;
+    color: var(--color-primary-400);
+  }
+
+  .merchant_category_btn.is_active {
+    background: var(--color-primary-400);
+  }
+
+  .merchant_category_btn.is_active .merchant_category_icon,
+  .merchant_category_btn.is_active .merchant_category_label {
+    color: var(--color-primary-100);
+  }
+
+  .merchant_contents {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Figma에 검색/지역선택/지도가 없어 데스크톱 전용 패널은 숨김 */
+  .merchant_panel {
+    display: block;
+  }
+
+  .merchant_search_panel,
+  .merchant_map_panel,
+  .merchant_location_row {
+    display: none;
+  }
+
+  .merchant_tablet_cards {
+    display: flex;
+    gap: 60px;
+    overflow-x: auto; /* Figma 실측: 카드 3개(418px×3+gap)가 1024px 폭보다 넓어 가로 스크롤 구조 */
+  }
+
+  .merchant_tablet_card {
+    position: relative;
+    width: 418px;
+    height: 546px;
+    flex-shrink: 0; /* flex가 카드 폭을 줄이지 않도록 고정 */
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 1px 5.6px rgba(0, 0, 0, 0.18);
+  }
+
+  .merchant_tablet_card > img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .merchant_tablet_card_info {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding: 25px;
+    background-color: var(--color-white);
+  }
+
+  .merchant_tablet_card_top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .merchant_tablet_card_name {
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--color-gray-500);
+  }
+
+  .merchant_tablet_card_category {
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--color-gray-300);
+  }
+
+  .merchant_tablet_card_distance {
+    margin-left: auto;
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--color-primary-400);
+  }
+
+  .merchant_tablet_card_phone,
+  .merchant_tablet_card_address {
+    display: flex;
+    gap: 5px;
+    font-size: 18px;
+  }
+
+  .merchant_tablet_card_phone {
+    align-items: center; /* Figma 실측: 전화번호는 한 줄이라 center */
+    font-weight: 500;
+    color: var(--color-shop-phone-text);
+  }
+
+  .merchant_tablet_card_address {
+    align-items: flex-start; /* Figma 실측: 주소는 2줄로 줄바꿈돼서 top 정렬 */
+    line-height: 1.3;
+    font-weight: 400;
+    color: var(--color-shop-address-text);
+  }
+
+  /* --- Promotion Banner (Figma: banner, node 1:1184 — tablet/mobile 동일값) --- */
+  .promo_banner_section {
+    padding: 65px 0;
+  }
+
+  .promo_banner_inner {
+    position: relative;
+    height: 120px;
+    padding-left: 115px; /* Figma 실측: 70px→115px로 수정 확인 */
+    padding-right: 318px; /* 아이콘 영역(width 240 + right 78) 만큼 미리 비워서 텍스트와 안 겹치게 함 */
+    background-color: var(--color-banner-purple);
+    border-radius: 0;
+    overflow: hidden; /* Figma: container에 overflow-clip 적용됨 — 프레임 밖으로 나간 아이콘을 잘라내는 방식 */
+    display: flex;
+    align-items: center;
+  }
+
+  .promo_banner_txt {
+    display: flex;
+    flex-direction: column;
+    min-width: 0; /* flex 아이템이 내용 폭만큼 밀려나지 않고 좁아지는 만큼 줄바꿈되도록 */
+    /* gap 의도적으로 생략: Figma는 10px지만, line-height:1 라인박스에 이미 폰트 자체의
+       상하 여백이 포함돼 있어 gap:10px를 더하면 Figma보다 넓어 보임(실측 후 확인).
+       gap 없이도 시각적으로 Figma와 일치. */
+  }
+
+  .promo_banner_subtit {
+    font-size: 24px;
+    font-weight: 300;
+    line-height: 1; /* Figma: leading-none */
+    color: var(--color-white);
+    letter-spacing: -0.48px;
+    white-space: normal; /* 모바일의 nowrap+ellipsis 처리를 태블릿에서는 다시 줄바꿈으로 되돌림 */
+    overflow: visible;
+    text-overflow: clip;
+  }
+
+  .promo_banner_tit {
+    font-size: 32px;
+    font-weight: 600;
+    line-height: 1; /* Figma: leading-none */
+    color: var(--color-banner-yellow);
+    letter-spacing: -0.64px;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+  }
+
+  .promo_banner_icon {
+    position: absolute;
+    width: 240px;
+    height: 135px;
+    right: 78px; /* Figma 실측: left:706px 대신 컨테이너 우측 기준(1024-706-240) 값으로 전환 — 태블릿 실제 폭이 1024보다 좁아도 안정적으로 위치 */
+    top: 5px;
+    object-fit: contain;
+  }
+
+  /* --- Card Application Guide (Figma: how, node 1:1193) ---
+     5단계 카드 텍스트/크기는 데스크톱과 완전히 동일(실측 확인) — 컨테이너 여백만 다름 */
+  .how_section {
+    padding: 120px 0 240px;
+  }
+
+  .how_inner {
+    max-width: none;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 36px;
+  }
+
+  .how_txt {
+    display: flex;
+    flex-direction: column;
+    gap: 70px;
+    padding: 0 40px; /* 카드 리스트(.how_steps)는 화면 끝까지 꽉 차게, 제목/탭만 여백 유지 */
+  }
+
+  .how_tit {
+    font-size: 44px;
+    font-weight: 700;
+    color: var(--color-gray-500);
+  }
+
+  .how_tit_highlight {
+    color: var(--color-primary-500);
+  }
+
+  .how_tabs {
+    display: flex;
+    gap: 20px;
+  }
+
+  .how_tab_btn {
+    padding: 15px 0;
+    width: 110px;
+    font-size: 24px;
+    font-weight: 300;
+    letter-spacing: -0.72px;
+    color: var(--color-gray-300);
+    text-align: center;
+  }
+
+  .how_tab_btn.is_active {
+    color: var(--color-primary-400);
+    border-bottom: 1px solid var(--color-primary-400);
+  }
+
+  .how_steps {
+    display: flex;
+    gap: 61px;
+    overflow-x: auto;
+  }
+
+  .how_step {
+    position: relative;
+    width: 420px;
+    height: 555px;
+    flex-shrink: 0;
+    border-radius: 15px;
+    background: var(--color-step-inactive-bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 35px;
+    cursor: pointer;
+  }
+
+  .how_step.is_active {
+    background: var(--color-white);
+    border: 2px solid var(--color-primary-400);
+    box-shadow: var(--shadow-step-active);
+  }
+
+  .how_step_number {
+    width: 88px;
+    height: 88px;
+    border-radius: 44px;
+    background: var(--color-white);
+    color: var(--color-gray-300);
+    font-size: 36px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .how_step.is_active .how_step_number {
+    background: var(--color-primary-400);
+    color: var(--color-white);
+  }
+
+  .how_step_chip {
+    padding: 7px 15px;
+    border-radius: 20px;
+    background: var(--color-gray-100);
+    color: var(--color-gray-400);
+    font-size: 20px;
+    font-weight: 500;
+  }
+
+  .how_step_main {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--color-white);
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  .how_step.is_active .how_step_main {
+    color: var(--color-gray-500);
+  }
+
+  .how_step_sub {
+    font-size: 24px;
+    font-weight: 500;
+    color: var(--color-gray-100);
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  .how_step.is_active .how_step_sub {
+    color: var(--color-gray-400);
+  }
+
+  /* --- News/Events (Figma: event, node 1:1215) ---
+     구조 차이: 왼쪽 프로모션 배너 없음, 리스트 아이템 이미지가 왼쪽(데스크톱은 오른쪽) */
+  .event_section {
+    background-color: #ebf5ff;
+    padding: 80px 60px 140px;
+  }
+
+  .event_inner {
+    display: block;
+  }
+
+  .event_banner {
+    display: none;
+  }
+
+  .event_content {
+    display: flex;
+    flex-direction: column;
+    gap: 43px; /* Figma 실측: (제목+탭행) ↔ 카드리스트 */
+  }
+
+  .event_txt {
+    display: flex;
+    flex-direction: column;
+    gap: 50px; /* Figma 실측: 제목 ↔ 탭행 */
+  }
+
+  /* 태블릿/모바일 전용 제목 — 데스크톱은 event_banner_tit로 이미 노출되어 숨김 처리 */
+  .event_tit {
+    font-size: 44px;
+    font-weight: 700;
+    color: var(--color-gray-500);
+  }
+
+  .event_content_top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .event_tabs {
+    display: flex;
+    gap: 20px;
+  }
+
+  .event_tab_btn {
+    width: 100px;
+    padding: 15px 0;
+    font-size: 24px;
+    font-weight: 300;
+    letter-spacing: -0.72px;
+    color: var(--color-gray-300);
+  }
+
+  .event_tab_btn.is_active {
+    color: var(--color-primary-400);
+    border-bottom: 1px solid var(--color-primary-400);
+  }
+
+  .event_more_link {
+    display: inline-flex;
+    align-items: center;
+    font-size: 24px;
+    font-weight: 500;
+    color: var(--color-gray-400);
+  }
+
+  .event_more_link .material-symbols-outlined {
+    font-size: 30px;
+  }
+
+  .event_list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  /* Figma 실측: 태블릿은 카드 4개까지만 존재("문화누리 인스타그램 구독 이벤트"는 데스크톱 전용) */
+  .event_list .event_item:last-child {
+    display: none;
+  }
+
+  .event_item {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    border-top: 1px solid var(--color-gray-300);
+    border-bottom: 1px solid var(--color-gray-300);
+    padding: 20px;
+  }
+
+  .event_list .event_item + .event_item {
+    border-top: none;
+  }
+
+  .event_item_txt {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+
+  .event_item_date {
+    font-size: 20px;
+    color: var(--color-gray-500);
+  }
+
+  .event_item_title {
+    font-size: 24px;
+    font-weight: 500;
+    color: var(--color-gray-500);
+  }
+
+  .event_item_chips {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+  }
+
+  .event_chip {
+    height: 44px;
+    padding: 0 15px;
+    border-radius: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--color-white);
+  }
+
+  .event_chip_ongoing { background: var(--color-primary-600); }
+  .event_chip_dday { background: var(--color-primary-400); padding: 0 12px; }
+  .event_chip_urgent { background: var(--color-secondary-green-400); }
+  .event_chip_closed { background: var(--color-gray-200); color: var(--color-gray-400); }
+
+  .event_item_img {
+    order: -1;
+    width: 334px;
+    height: 197px;
+    border-radius: 15px;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+
+  .event_empty_txt {
+    font-size: 20px;
+    color: var(--color-gray-400);
+    padding: 60px 0;
+    text-align: center;
+  }
+
+  /* --- FAQ Search (Figma: help, node 1:1280) ---
+     구조 차이: 그라디언트 배경 + 1열 중앙 정렬 레이아웃 */
+  .help_section {
+    min-height: 882px; /* Figma 실측 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-image: linear-gradient(
+      246.998deg,
+      var(--color-help-gradient-1) 0%,
+      var(--color-help-gradient-2) 49.504%,
+      var(--color-help-gradient-3) 100%
+    );
+  }
+
+  .help_inner {
+    width: 568px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .help_avatar {
+    width: 140px;
+    height: 140px;
+    object-fit: contain;
+    margin-bottom: 20px;
+  }
+
+  .help_tit {
+    font-size: 40px;
+    font-weight: 700;
+    color: var(--color-gray-500);
+    margin-bottom: 27px;
+  }
+
+  .help_search {
+    position: relative;
+    width: 100%;
+    height: 69px;
+    border: 1px solid var(--color-gray-300);
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    padding: 10px 20px;
+  }
+
+  .help_search_icon {
+    font-size: 24px;
+    color: var(--color-gray-300);
+    margin-right: 12px;
+  }
+
+  .help_search_input {
+    flex: 1;
+    border: none;
+    background: none;
+    font-size: 22px;
+    color: var(--color-gray-500);
+  }
+
+  .help_chips {
+    align-self: flex-start; /* Figma 실측: bottom 그룹(검색창+칩)은 items-start */
+    display: flex;
+    flex-wrap: wrap;
+    width: 390px;
+    gap: 15px 13px;
+    margin-top: 27px;
+  }
+
+  .help_chip {
+    height: 45px;
+    padding: 10px;
+    border-radius: 100px;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--color-primary-400);
+    background: var(--color-faq-chip-bg);
+    white-space: nowrap;
+  }
+
+  .help_chip.is_active {
+    background: var(--color-faq-chip-bg-active);
+  }
+
+  /* --- Footer (Figma: footer, node 1:1299) --- */
+  .footer {
+    background-color: #1a1a1a;
+    color: var(--color-white);
+  }
+
+  .footer_top {
+    display: flex;
+    justify-content: center;
+    padding: 27px 40px;
+    border-bottom: 1px solid var(--color-gray-400);
+  }
+
+  .footer_links {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .footer_link {
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--color-white);
+    padding: 10px;
+  }
+
+  .footer_link_divider {
+    width: 1px;
+    height: 17px;
+    background: var(--color-gray-400);
+  }
+
+  .footer_main {
+    display: flex;
+    justify-content: flex-start;
+    padding: 58px 40px;
+    border-bottom: 1px solid var(--color-gray-400);
+  }
+
+  .footer_center {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    text-align: left;
+  }
+
+  .footer_service {
+    display: flex;
+    align-items: baseline;
+    justify-content: flex-start;
+    gap: 30px;
+    font-weight: 700;
+    margin-bottom: 0;
+  }
+
+  .footer_service_label,
+  .footer_service_phone {
+    font-size: 28px;
+  }
+
+  .footer_info_txt {
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 2.31;
+  }
+
+  .footer_bottom {
+    padding: 19px 40px;
+  }
+
+  .footer_logo_row {
+    max-width: none;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .footer_logo_main {
+    width: 161px;
+    height: 23px;
+    object-fit: contain;
+  }
+
+  .footer_logo_right {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+  }
+
+  .footer_logo_lottery {
+    width: 117px;
+    height: 41px;
+    object-fit: contain;
+  }
+
+  .footer_logo_wa {
+    width: 86px;
+    height: 63px;
+    object-fit: contain;
   }
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1920px) {
+  /* 태블릿 전용으로 숨겼던 데스크톱 요소 복원 */
+  .merchant_search_panel,
+  .merchant_map_panel,
+  .merchant_location_row {
+    display: flex;
+  }
+
+  .merchant_tablet_cards {
+    display: none;
+  }
+
+  .quickmenu_card_more,
+  .quickmenu_card_deco {
+    display: block;
+  }
+
+  .event_banner {
+    display: flex;
+  }
+
+  .event_item_img {
+    order: 0;
+  }
+
   /* 데스크톱(1024px) 이상 — main_hero: 절대 위치 텍스트 + 잔액확인 카드 오버레이 */
   .hero_slider {
     margin: 0;
@@ -570,12 +1593,16 @@ svg {
     align-items: center;
   }
 
+  /* 1920px보다 넓은 화면에서 배경(hero_slide_bg)은 계속 100% 채우되,
+     텍스트는 1920px 기준 프레임을 가운데 고정한 위치(Figma 실측 196px 인셋)에서
+     더 이상 벌어지지 않도록 calc()로 계산. 1920px에서는 기존 196px과 동일한 값. */
   .hero_slide_inner {
-    position: static;
-    left: auto;
+    position: absolute;
+    left: calc(50% - 960px + 196px);
     right: auto;
+    top: 50%;
     bottom: auto;
-    padding-left: 196px;
+    transform: translateY(-50%);
     gap: 76px; /* Figma 실측: txt그룹 ↔ more링크 간격(desktop) */
   }
 
@@ -612,11 +1639,12 @@ svg {
     bottom: 80px;
   }
 
-  /* Figma: 잔액확인 카드는 히어로 우측에 오버레이 (right_box, rgba(255,255,255,.75)) */
+  /* Figma: 잔액확인 카드는 히어로 우측에 오버레이 (right_box, rgba(255,255,255,.75))
+     hero_slide_inner와 동일한 이유로 1920px 프레임 기준 calc() 사용(1920px에선 196px와 동일) */
   .balance_card {
     position: absolute;
     top: 50%;
-    right: 196px;
+    right: calc(50% - 960px + 196px);
     z-index: 3;
     width: 451px;
     height: 576px; /* Figma 실측(right_box 고정값) */
@@ -637,8 +1665,23 @@ svg {
     border-radius: 7px;
   }
 
-  /* Figma 실측: 헤더(Component 4) 데스크톱 값 */
+  /* Figma엔 없는 UX 개선 — 데스크톱 전용 스크롤 방향 감지 헤더 숨김/노출
+     (design-analysis.md 기록 대상). 태블릿/모바일은 이 규칙 밖(base)이라 영향 없음. */
+  .header {
+    transform: translateY(0);
+    transition: transform 0.3s ease;
+  }
+
+  .header.is_hidden {
+    transform: translateY(-100%);
+  }
+
+  /* Figma 실측: 헤더(Component 4) 데스크톱 값.
+     1920px보다 넓은 화면에서 .header 자체 배경(반투명 흰색)은 전체 폭을 채우되,
+     내부 콘텐츠(로고/GNB/토글/햄버거)는 1920px 프레임에서 더 벌어지지 않도록 고정 */
   .header_inner {
+    max-width: 1920px;
+    margin: 0 auto;
     padding: 16px 160px;
   }
 
@@ -718,40 +1761,101 @@ svg {
     display: none;
   }
 
+  /* Figma엔 없는 UX 개선 — 데스크톱 전용 전체메뉴 페이드 인/아웃(design-analysis.md 기록 대상)
+     (Figma: Component 9, node 14:823 — 정적 레이아웃/타이포는 Figma 그대로, 모션만 추가)
+     Figma 실측: outer padding은 top:0 / bottom:30px, 좌우 70px는 top row가 아니라
+     "menu"(제목+4열) 블록에만 실질 적용됨 — top row는 자체 padding(16px 160px)으로
+     off-state 헤더(.header_inner)와 동일한 위치를 가져서 햄버거↔X가 겹쳐 보임. */
   .header_menu_panel {
-    padding: 30px 70px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 640px; /* Figma 실측: Component 8(on) 고정 높이 */
+    overflow: visible;
+    padding: 30px 0;
+    transform: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .header.is_menu_open .header_menu_panel {
+    opacity: 1;
+  }
+
+  .header_menu_dim {
+    display: none;
   }
 
   .header_menu_top {
-    margin-bottom: 70px;
+    max-width: 1920px; /* header_inner와 동일한 이유로 1920px 프레임 고정 — X/햄버거 겹침 유지 */
+    padding: 16px 160px; /* Figma 실측: off-state .header_inner와 동일 — 햄버거/X 위치 일치 */
+    margin: 0 auto 40px; /* Figma 실측: 상단행(로고+닫기)-전체메뉴 타이틀 간 gap 40px */
+  }
+
+  /* Figma 실측: on-state 닫기 아이콘도 off-state 햄버거와 동일한 60x60 박스 —
+     같은 padding(16px 160px)과 합쳐져 두 아이콘이 정확히 같은 위치에 겹쳐 보임 */
+  .header_menu_close {
+    width: 60px;
+    height: 60px;
+  }
+
+  /* 데스크톱만 로고 노출, 태블릿/모바일 전용 home+로그인은 숨김 */
+  .header_menu_top .header_logo {
+    display: flex;
+  }
+
+  .header_menu_top_left {
+    display: none;
   }
 
   .header_logo_txt_dark {
     font-size: 32px;
   }
 
+  /* 데스크톱만 "전체메뉴" 타이틀 노출 */
   .header_menu_tit {
+    display: block;
+    max-width: 1542px; /* Figma 실측: "menu" 블록 폭 — top row(160px 패딩)와 별개로 중앙 정렬 */
+    margin: 0 auto 60px;
     font-size: 36px;
     font-weight: 600;
-    margin-bottom: 60px;
   }
 
   .header_menu_grid {
     flex-direction: row;
     gap: 0;
+    max-width: 1542px; /* Figma 실측: "menu" 블록 폭 — header_menu_tit와 동일 폭으로 좌우 정렬 일치 */
+    margin: 0 auto;
   }
 
+  /* 데스크톱은 아코디언 없이 4열 고정 노출 — 태블릿 전용 보더/여백 제거 */
   .header_menu_group {
     width: 325px;
+    border-bottom: none;
+    padding: 0;
   }
 
   .header_menu_group_tit {
     font-size: 26px;
-    margin-bottom: 32px;
+    font-weight: 600;
+    cursor: default;
   }
 
-  .header_menu_group_list {
+  .header_menu_group_arrow {
+    display: none;
+  }
+
+  /* 데스크톱은 is_open 여부와 무관하게 항상 펼침 고정 */
+  .header_menu_group_list_wrap,
+  .header_menu_group.is_open .header_menu_group_list_wrap {
+    grid-template-rows: 1fr;
+  }
+
+  .header_menu_group_list,
+  .header_menu_group.is_open .header_menu_group_list {
     gap: 0;
+    padding-top: 32px;
   }
 
   .header_menu_group_list a {
@@ -1162,11 +2266,6 @@ svg {
     line-height: 1.3;
   }
 
-  .merchant_item_phone .material-symbols-outlined,
-  .merchant_item_address .material-symbols-outlined {
-    font-size: 18px;
-  }
-
   .merchant_map_panel {
     position: relative;
     width: 851px;
@@ -1246,13 +2345,15 @@ svg {
   .promo_banner_subtit {
     font-size: 25px;
     font-weight: 300;
+    line-height: 1; /* Figma: leading-none */
     color: var(--color-white);
     letter-spacing: -0.5px;
   }
 
   .promo_banner_tit {
-    font-size: 43px;
+    font-size: 32px;
     font-weight: 600;
+    line-height: 1; /* Figma: leading-none */
     color: var(--color-banner-yellow);
     letter-spacing: -0.86px;
   }
@@ -1334,12 +2435,13 @@ svg {
     align-items: center;
     justify-content: center;
     gap: 35px;
+    cursor: pointer;
   }
 
   .how_step.is_active {
     background: var(--color-white);
     border: 2px solid var(--color-primary-400);
-    box-shadow: var(--shadow-card);
+    box-shadow: var(--shadow-step-active);
   }
 
   .how_step_number {
@@ -1409,6 +2511,15 @@ svg {
   .event_section {
     background: var(--color-event-section-bg);
     padding: 200px 0;
+  }
+
+  /* 태블릿 전용 제목은 숨기고(데스크톱은 event_banner_tit 사용), 5번째 카드는 복원 */
+  .event_tit {
+    display: none;
+  }
+
+  .event_list .event_item:last-child {
+    display: flex;
   }
 
   .event_inner {
@@ -1777,6 +2888,12 @@ svg {
   .footer_logo_lottery {
     width: 117px;
     height: 41px;
+    object-fit: contain;
+  }
+
+  .footer_logo_wa {
+    width: 86px;
+    height: 63px;
     object-fit: contain;
   }
 }
