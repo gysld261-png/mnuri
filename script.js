@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initMerchantSection();
   initHowTabs();
   initStepCards();
+  initHowStepsScrollJack();
   initEventTabs();
   initHelpSearch();
 });
@@ -20,6 +21,9 @@ document.addEventListener('DOMContentLoaded', () => {
    -------------------------------------------------------------------------- */
 let currentHeroIndex = 0;
 const totalHeroSlides = 3;
+const HERO_AUTO_SLIDE_INTERVAL = 7500;
+let heroAutoSlideTimer = null;
+const heroPrefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 function initHeroSlider() {
   const track = document.getElementById('hero_track');
@@ -31,14 +35,19 @@ function initHeroSlider() {
   if (prevBtn) {
     prevBtn.addEventListener('click', () => {
       handleHeroSlideChange(track, currentHeroIndex > 0 ? currentHeroIndex - 1 : totalHeroSlides - 1);
+      startHeroAutoSlide(track);
     });
   }
 
   if (nextBtn) {
     nextBtn.addEventListener('click', () => {
       handleHeroSlideChange(track, currentHeroIndex < totalHeroSlides - 1 ? currentHeroIndex + 1 : 0);
+      startHeroAutoSlide(track);
     });
   }
+
+  restartHeroProgressBar();
+  startHeroAutoSlide(track);
 }
 
 function handleHeroSlideChange(track, nextIndex) {
@@ -56,21 +65,76 @@ function handleHeroSlideChange(track, nextIndex) {
     const displayNum = currentHeroIndex + 1;
     slideNumEl.textContent = displayNum < 10 ? `0${displayNum}` : displayNum;
   }
+
+  restartHeroProgressBar();
+}
+
+/* 자동 슬라이드: setInterval은 이 타이머 하나만 유지. 수동 조작 시 clear 후 재시작(재등록 아님) */
+function startHeroAutoSlide(track) {
+  if (heroAutoSlideTimer) {
+    clearInterval(heroAutoSlideTimer);
+    heroAutoSlideTimer = null;
+  }
+  if (heroPrefersReducedMotion) return;
+
+  heroAutoSlideTimer = setInterval(() => {
+    handleHeroSlideChange(track, currentHeroIndex < totalHeroSlides - 1 ? currentHeroIndex + 1 : 0);
+  }, HERO_AUTO_SLIDE_INTERVAL);
+}
+
+/* Progress Bar를 0%부터 다시 채움(클래스 재부착 트릭으로 CSS 애니메이션 재시작) */
+function restartHeroProgressBar() {
+  const progressBar = document.getElementById('hero_pager_progress_bar');
+  if (!progressBar || heroPrefersReducedMotion) return;
+
+  progressBar.classList.remove('is_animating');
+  void progressBar.offsetWidth;
+  progressBar.classList.add('is_animating');
 }
 
 /* --------------------------------------------------------------------------
    3. Merchant Finder (Figma: shop, node 1:185)
    -------------------------------------------------------------------------- */
-const REGION_GUGUN_MAP = {
-  seoul: ['강남구', '서초구', '마포구'],
-  gyeonggi: ['수원시', '성남시', '고양시'],
-  busan: ['해운대구', '수영구', '동래구'],
-};
+/* REGION_GUGUN_MAP은 region-data.js에서 정의 (index.html에서 이 파일보다 먼저 로드) */
 
 function initMerchantSection() {
   initMerchantCategories();
   initMerchantRegionSelect();
+  initMerchantSearchButtonState();
   initMerchantMapButtons();
+  initMerchantMap();
+}
+
+/* --------------------------------------------------------------------------
+   3-2. Kakao Map (가맹점 주변 지도 — 보조 기능. 마커/장소검색/길찾기 없음)
+   좌표 데이터는 region-coords.js의 REGION_SIDO_COORDS / REGION_GUGUN_COORDS 참조.
+   -------------------------------------------------------------------------- */
+const MERCHANT_MAP_SIDO_ZOOM_LEVEL = 9;
+const MERCHANT_MAP_GUGUN_ZOOM_LEVEL = 6;
+
+let merchantMapInstance = null;
+
+function initMerchantMap() {
+  const mapContainer = document.getElementById('merchant_map');
+  if (!mapContainer || typeof kakao === 'undefined' || !kakao.maps) return;
+
+  kakao.maps.load(() => {
+    const defaultCenter = REGION_SIDO_COORDS.seoul;
+    merchantMapInstance = new kakao.maps.Map(mapContainer, {
+      center: new kakao.maps.LatLng(defaultCenter.lat, defaultCenter.lng),
+      level: MERCHANT_MAP_SIDO_ZOOM_LEVEL,
+    });
+
+    merchantMapInstance.setDraggable(true);
+    merchantMapInstance.setZoomable(true);
+    merchantMapInstance.addControl(new kakao.maps.ZoomControl(), kakao.maps.ControlPosition.RIGHT);
+  });
+}
+
+function panMerchantMapTo(coords, zoomLevel) {
+  if (!merchantMapInstance || !coords) return;
+  merchantMapInstance.setLevel(zoomLevel);
+  merchantMapInstance.panTo(new kakao.maps.LatLng(coords.lat, coords.lng));
 }
 
 function initMerchantCategories() {
@@ -101,11 +165,30 @@ function initMerchantRegionSelect() {
     gugunSelect.disabled = gugunList.length === 0;
     gugunSelect.value = '';
     searchBtn.disabled = true;
+
+    panMerchantMapTo(REGION_SIDO_COORDS[sidoSelect.value], MERCHANT_MAP_SIDO_ZOOM_LEVEL);
   });
 
   gugunSelect.addEventListener('change', () => {
     searchBtn.disabled = gugunSelect.value === '';
+
+    const gugunCoords = REGION_GUGUN_COORDS[sidoSelect.value] || {};
+    panMerchantMapTo(gugunCoords[gugunSelect.value], MERCHANT_MAP_GUGUN_ZOOM_LEVEL);
   });
+}
+
+/* 검색 input 포커스 시 검색 버튼을 활성 스타일로 전환(hover 활성 스타일은 CSS만으로 처리) */
+function initMerchantSearchButtonState() {
+  const searchInput = document.getElementById('merchant_search_input');
+  const searchBtn = document.getElementById('merchant_search_btn');
+  if (!searchInput || !searchBtn) return;
+
+  function syncInputActiveStyle() {
+    searchBtn.classList.toggle('is_input_active', document.activeElement === searchInput);
+  }
+
+  searchInput.addEventListener('focus', syncInputActiveStyle);
+  searchInput.addEventListener('blur', syncInputActiveStyle);
 }
 
 function initMerchantMapButtons() {
@@ -114,15 +197,23 @@ function initMerchantMapButtons() {
 
   if (locationBtn) {
     locationBtn.addEventListener('click', () => {
+      flashMapBtnClick(locationBtn);
       showModal('위치 재설정', '현재 위치가 [서울시 강남구] 기준으로 업데이트 되었습니다.');
     });
   }
 
   if (changeBtn) {
     changeBtn.addEventListener('click', () => {
+      flashMapBtnClick(changeBtn);
       showModal('지역 변경', '주변 가맹점을 찾고자 하는 동/구 이름을 검색하여 변경할 수 있습니다.');
     });
   }
+}
+
+/* 클릭 시 잠깐 스타일이 바뀌었다가 자동으로 원래대로 복귀하는 "딸깍" 피드백 */
+function flashMapBtnClick(btn) {
+  btn.classList.add('is_clicked');
+  setTimeout(() => btn.classList.remove('is_clicked'), 200);
 }
 
 /* --------------------------------------------------------------------------
@@ -151,6 +242,10 @@ function initHowTabs() {
    기본값은 1번 카드가 활성화된 상태로 시작(HTML의 is_active 클래스 그대로 사용).
    -------------------------------------------------------------------------- */
 function initStepCards() {
+  // 스크롤 고정 모드(마우스 입력 환경)에서는 스크롤 진행에 따라 자동 활성화되므로
+  // 클릭 활성화를 붙이지 않음. 터치 기기는 대체 수단이 없어 기존 클릭 활성화 유지.
+  if (isHowStepsScrollJackSupported()) return;
+
   const stepCards = document.querySelectorAll('.how_step');
   stepCards.forEach((card) => {
     card.addEventListener('click', () => handleStepCardClick(card));
@@ -163,6 +258,137 @@ function handleStepCardClick(cardEl) {
     const isTarget = card === cardEl;
     card.classList.toggle('is_active', isTarget);
     card.setAttribute('aria-pressed', String(isTarget));
+  });
+}
+
+/* --------------------------------------------------------------------------
+   3-1-2. How Steps Scroll-Jack (Figma엔 없는 UX 개선)
+   마우스/트랙패드(hover:hover, pointer:fine) 환경에서만 적용. 세로 스크롤 중
+   화면을 고정하고 카드를 가로로 이동시키며, 화면 중앙에 온 카드를 자동 활성화.
+   터치 기기·prefers-reduced-motion 환경은 기존 가로 드래그 스크롤+클릭 활성화 유지.
+   -------------------------------------------------------------------------- */
+function isHowStepsScrollJackSupported() {
+  return (
+    window.matchMedia('(hover: hover) and (pointer: fine)').matches &&
+    !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  );
+}
+
+function initHowStepsScrollJack() {
+  const stage = document.getElementById('how_scroll_stage');
+  const sticky = document.getElementById('how_scroll_sticky');
+  const track = document.getElementById('how_steps');
+  if (!stage || !sticky || !track) return;
+  if (!isHowStepsScrollJackSupported()) return;
+
+  const steps = Array.from(track.querySelectorAll('.how_step'));
+  if (steps.length === 0) return;
+
+  let baseLeft = 0;
+  let maxTranslate = 0;
+  let ticking = false;
+  let scrollListenerAttached = false;
+
+  function setActiveStep(targetStep) {
+    steps.forEach((step) => {
+      const isTarget = step === targetStep;
+      step.classList.toggle('is_active', isTarget);
+      step.setAttribute('aria-pressed', String(isTarget));
+    });
+  }
+
+  function setActiveByScreenCenter() {
+    const centerX = window.innerWidth / 2;
+    let closest = steps[0];
+    let minDist = Infinity;
+    steps.forEach((step) => {
+      const rect = step.getBoundingClientRect();
+      const dist = Math.abs((rect.left + rect.right) / 2 - centerX);
+      if (dist < minDist) {
+        minDist = dist;
+        closest = step;
+      }
+    });
+    setActiveStep(closest);
+  }
+
+  function measure() {
+    sticky.classList.remove('is_pinned', 'is_done');
+    track.style.transform = 'translateX(0)';
+    baseLeft = track.getBoundingClientRect().left;
+    maxTranslate = Math.max(0, baseLeft + track.scrollWidth - window.innerWidth);
+    stage.style.height = `${window.innerHeight + maxTranslate}px`;
+    track.classList.add('is_scroll_jacked');
+    update();
+  }
+
+  function update() {
+    ticking = false;
+    const rect = stage.getBoundingClientRect();
+    const viewportH = window.innerHeight;
+
+    if (rect.top > 0) {
+      sticky.classList.remove('is_pinned', 'is_done');
+      track.style.transform = 'translateX(0)';
+      setActiveStep(steps[0]);
+      return;
+    }
+
+    if (rect.bottom <= viewportH) {
+      sticky.classList.remove('is_pinned');
+      sticky.classList.add('is_done');
+      track.style.transform = `translateX(${baseLeft - maxTranslate}px)`;
+      setActiveStep(steps[steps.length - 1]);
+      return;
+    }
+
+    sticky.classList.add('is_pinned');
+    sticky.classList.remove('is_done');
+    const progress = maxTranslate === 0 ? 0 : Math.min(1, Math.max(0, -rect.top / maxTranslate));
+    track.style.transform = `translateX(${baseLeft - progress * maxTranslate}px)`;
+    setActiveByScreenCenter();
+  }
+
+  function onScroll() {
+    if (!ticking) {
+      ticking = true;
+      requestAnimationFrame(update);
+    }
+  }
+
+  function attachScrollListener() {
+    if (scrollListenerAttached) return;
+    window.addEventListener('scroll', onScroll, { passive: true });
+    scrollListenerAttached = true;
+  }
+
+  function detachScrollListener() {
+    if (!scrollListenerAttached) return;
+    window.removeEventListener('scroll', onScroll);
+    scrollListenerAttached = false;
+  }
+
+  measure();
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          attachScrollListener();
+          update();
+        } else {
+          detachScrollListener();
+        }
+      });
+    },
+    { rootMargin: '200px 0px 200px 0px' }
+  );
+  observer.observe(stage);
+
+  let resizeTimer = null;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(measure, 200);
   });
 }
 
@@ -279,10 +505,13 @@ function initHeaderScrollBehavior() {
 
     if (currentScrollY <= 0) {
       header.classList.remove('is_hidden');
+      header.classList.remove('is_scrolled');
     } else if (currentScrollY > lastScrollY) {
       header.classList.add('is_hidden');
+      header.classList.add('is_scrolled');
     } else if (currentScrollY < lastScrollY) {
       header.classList.remove('is_hidden');
+      header.classList.add('is_scrolled');
     }
 
     lastScrollY = currentScrollY;

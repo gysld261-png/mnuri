@@ -335,9 +335,9 @@ svg {
 }
 
 .header_menu_login_btn {
-  padding: 8px 16px;
-  font-size: 15px;
-  font-weight: 500;
+  padding: 6px 14px;
+  font-size: 20px;
+  font-weight: 700;
   color: var(--color-primary-400);
   border: 1px solid var(--color-primary-400);
   border-radius: 15px;
@@ -381,10 +381,9 @@ svg {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 600;
-  color: var(--color-gray-500);
-  text-align: left;
+  color: var(--color-primary-600);text-align: left;
 }
 
 .header_menu_group_arrow {
@@ -417,11 +416,11 @@ svg {
 }
 
 .header_menu_group.is_open .header_menu_group_list {
-  padding-top: 16px;
+  padding-top: 30px;
 }
 
 .header_menu_group_list a {
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 400;
   color: var(--color-gray-400);
   transition: color 0.2s ease;
@@ -448,7 +447,7 @@ svg {
 
 .hero_track {
   display: flex;
-  transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+  transition: transform 700ms ease-in-out;
 }
 
 .hero_slide {
@@ -457,6 +456,14 @@ svg {
   width: 100%;
   height: 790px;
   overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 700ms ease-in-out;
+}
+
+.hero_slide.is_active {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .hero_slide_bg {
@@ -506,6 +513,26 @@ svg {
   color: var(--color-white);
 }
 
+/* 미세 인터랙션: 슬라이드 진입 시 배경(슬라이드 자체 opacity) → sub → tit 순 stagger */
+.hero_slide_sub,
+.hero_slide_tit {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 600ms ease-out, transform 600ms ease-out;
+}
+
+.hero_slide.is_active .hero_slide_sub {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: 80ms;
+}
+
+.hero_slide.is_active .hero_slide_tit {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: 160ms;
+}
+
 .hero_slide_tit strong {
   font-weight: 700;
 }
@@ -550,14 +577,61 @@ svg {
 }
 
 .hero_pager_count {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   font-size: 24px;
   line-height: normal;
   color: rgba(255, 255, 255, 0.6);
 }
 
+/* Hero Progress Navigation: 번호 + 얇은 progress bar + 전체 슬라이드 수 */
+.hero_pager_progress_track {
+  position: relative;
+  width: 160px;
+  height: 3px;
+  border-radius: 2px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.hero_pager_progress_bar {
+  position: absolute;
+  inset: 0;
+  transform-origin: left center;
+  transform: scaleX(0);
+  border-radius: 2px;
+  background: var(--color-primary-400);
+}
+
+.hero_pager_progress_bar.is_animating {
+  animation: hero_progress_fill 7.5s linear forwards;
+}
+
+@keyframes hero_progress_fill {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
 .hero_pager_count strong {
   font-weight: 700;
   color: var(--color-white);
+}
+
+/* 접근성: 모션 최소화 환경에서는 전환/stagger/progress 애니메이션을 없애고 즉시 상태로 표시 */
+@media (prefers-reduced-motion: reduce) {
+  .hero_track,
+  .hero_slide,
+  .hero_slide_sub,
+  .hero_slide_tit,
+  .hero_pager_progress_bar {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .hero_pager_progress_bar.is_animating {
+    transform: scaleX(1);
+  }
 }
 
 /* Figma: login (잔액확인 카드) — 모바일/태블릿은 히어로 아래 일반 블록 */
@@ -771,7 +845,7 @@ svg {
   width: 195px;
   height: 109px;
   right: 24px; /* Figma 실측: left:549px 대신 컨테이너 우측 기준(768-549-195) 값으로 전환 */
-  top: 27px;
+  top: 25px;
   object-fit: contain;
 }
 
@@ -895,6 +969,18 @@ svg {
 .merchant_category_btn.is_active .merchant_category_icon,
 .merchant_category_btn.is_active .merchant_category_label {
   color: var(--color-primary-100);
+}
+
+/* Figma 실측(node 1:202 movie = hover 상태): 흰 배경은 유지하고 그림자만 파란 글로우로 전환.
+   마우스 입력장치에서만 적용(hover:hover, pointer:fine) — 터치 기기의 sticky hover 방지 */
+@media (hover: hover) and (pointer: fine) {
+  .merchant_category_btn {
+    transition: box-shadow 0.25s ease;
+  }
+
+  .merchant_category_btn:not(.is_active):hover {
+    box-shadow: 0 0 4.6px rgba(18, 134, 255, 0.79);
+  }
 }
 
 .merchant_contents {
@@ -1069,6 +1155,44 @@ svg {
   display: flex;
   gap: 61px;
   overflow-x: auto; /* Figma 실측: 카드 5개(420px×5+gap)가 768px 폭보다 넓어 가로 스크롤 구조 */
+}
+
+/* Figma엔 없는 UX 개선 — 마우스 입력 환경(hover:hover, pointer:fine) 전용 스크롤 고정+가로 이동.
+   터치 기기는 이 미디어쿼리 밖이라 how_scroll_stage/how_scroll_sticky가 아무 효과 없는
+   빈 래퍼로 남고, how_steps는 기존 overflow-x:auto 가로 드래그 스크롤을 그대로 유지함. */
+@media (hover: hover) and (pointer: fine) {
+  .how_scroll_stage {
+    position: relative;
+  }
+
+  .how_scroll_sticky {
+    overflow: hidden;
+  }
+
+  .how_scroll_sticky.is_pinned {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    z-index: 5;
+  }
+
+  .how_scroll_sticky.is_done {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    align-items: center;
+  }
+
+  .how_steps.is_scroll_jacked {
+    overflow: visible;
+    will-change: transform;
+  }
 }
 
 .how_step {
@@ -1518,6 +1642,11 @@ svg {
      헤더가 fixed인 태블릿·데스크톱에만 적용. 모바일은 헤더가 문서 흐름(relative)이라 제외. */
   .header.is_hidden {
     transform: translateY(-100%);
+  }
+
+  /* Figma엔 없는 UX 개선 — 맨 위가 아닌 상태에서 스크롤을 올려 헤더가 다시 보일 때 배경 변경 */
+  .header.is_scrolled {
+    background-color: rgba(28, 28, 28, 0.3);
   }
 
   .header_inner {
@@ -2599,7 +2728,7 @@ svg {
   .header_menu_tit {
     display: block;
     max-width: 1542px; /* Figma 실측: "menu" 블록 폭 — top row(160px 패딩)와 별개로 중앙 정렬 */
-    margin: 0 auto 60px;
+    margin: 0 auto 40px;
     font-size: 36px;
     font-weight: 600;
   }
@@ -2637,11 +2766,11 @@ svg {
   .header_menu_group_list,
   .header_menu_group.is_open .header_menu_group_list {
     gap: 0;
-    padding-top: 32px;
+    padding-top: 30px;
   }
 
   .header_menu_group_list a {
-    font-size: 16px;
+    font-size: 20px;
     font-weight: 500;
     line-height: 2.4;
   }
@@ -2915,6 +3044,11 @@ svg {
     width: 198px;
   }
 
+  /* 시/도 선택 후 활성화되면 #region_sido_select와 동일한 활성 스타일 적용 */
+  #region_gugun_select:not(:disabled) {
+    border: 2px solid var(--color-primary-400);
+  }
+
   .merchant_select_icon {
     position: absolute;
     right: 8px;
@@ -2943,17 +3077,23 @@ svg {
     width: 46px;
     height: 48px;
     border-radius: 5px;
-    background: var(--color-primary-400);
-    color: var(--color-white);
+    background: var(--color-gray-200);
+    color: var(--color-gray-400);
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
 
   .merchant_search_btn:disabled {
-    background: var(--color-gray-200);
-    color: var(--color-gray-400);
     cursor: not-allowed;
+  }
+
+  /* 시/도+구/군 선택 완료 후, 검색 input 포커스 또는 버튼 hover 시에만 활성 스타일(기존 기본 스타일) 적용 */
+  .merchant_search_btn:not(:disabled):hover,
+  .merchant_search_btn:not(:disabled).is_input_active {
+    background: var(--color-primary-400);
+    color: var(--color-white);
   }
 
   .merchant_list {
@@ -3065,24 +3205,76 @@ svg {
     overflow: hidden;
   }
 
+  /* 지도(#merchant_map)가 불투명해서 부모의 inset shadow를 가리기 때문에,
+     지도 위에 얹는 별도 오버레이로 리스트-지도 경계 inner shadow를 그림 (Figma 실측: node 1:292) */
+  .merchant_map_inner_shadow {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: inset 4px 0 4px 0 rgba(22, 22, 22, 0.1);
+    pointer-events: none;
+    z-index: 5;
+  }
+
   .merchant_map_img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
   }
 
-  /* asset/right_map.png 안에 "내 위치 | 지역 변경" 버튼이 이미 그려져 있어
-     투명 히트 영역만 겹쳐 접근성(button)을 확보합니다. */
-  .merchant_map_btn {
+  /* 기존 right_map.png 안에 그려져 있던 "내 위치 | 지역 변경" UI를 HTML Overlay로 재구현.
+     컨테이너는 pointer-events:none으로 지도 드래그/휠 확대를 그대로 통과시키고,
+     버튼 각각만 pointer-events:auto로 클릭 가능하게 되살림. 지도 크기와 무관하게
+     merchant_map_panel(position:relative) 기준 좌상단에 항상 고정. */
+  .merchant_map_overlay_ui {
     position: absolute;
     top: 25px;
-    width: 97px;
-    height: 43px;
-    background: transparent;
+    left: 25px;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    background: var(--color-white);
+    border-radius: 8px;
+    box-shadow: 0 2px 3.5px rgba(0, 0, 0, 0.25); /* Figma 실측(node 1:294 left) */
+    pointer-events: none;
   }
 
-  .merchant_map_btn_location { left: 25px; }
-  .merchant_map_btn_change { left: 122px; }
+  .merchant_map_btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 43px;
+    padding: 0 14px;
+    background: transparent;
+    color: var(--color-gray-00);
+    font-size: 16px;
+    pointer-events: auto;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+    font-weight: 600;
+  }
+
+  /* 클릭 시 짧게 배경이 바뀌었다가 자동으로 원래대로 복귀(딸깍 피드백). script.js에서 클릭 시 부여 후 setTimeout으로 제거 */
+  .merchant_map_btn.is_clicked {
+    background: var(--color-gray-100);
+  }
+
+  .merchant_map_btn_icon {
+    font-size: 20px;
+  }
+
+  .merchant_map_btn_location .merchant_map_btn_icon {
+    color: var(--color-secondary-green-400);
+  }
+
+  .merchant_map_btn_change .merchant_map_btn_icon {
+    color: var(--color-primary-400);
+  }
+
+  .merchant_map_btn_divider {
+    width: 1px;
+    height: 20px;
+    background: var(--color-gray-200);
+  }
 
   .merchant_location_row {
     display: flex;
@@ -3123,7 +3315,6 @@ svg {
     align-items: center;
     padding: 30px 0 30px 360px;
     overflow: hidden;
-    top:
   }
 
   .promo_banner_txt {

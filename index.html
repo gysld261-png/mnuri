@@ -14,7 +14,7 @@
   <header class="header" id="site_header">
     <div class="header_inner">
       <a href="#" class="header_logo">
-        <img src="./asset/logo_pc2.svg" alt="문화누리카드" class="header_logo_icon">
+        <img src="./asset/mnuri_logo3.svg" alt="문화누리카드" class="header_logo_icon">
       </a>
 
       <nav class="header_nav" aria-label="주요 메뉴">
@@ -53,7 +53,7 @@
     <div class="header_menu_panel" id="header_menu_panel" hidden>
       <div class="header_menu_top">
         <a href="#" class="header_logo">
-          <img src="./asset/logo_pc2.svg" alt="문화누리카드" class="header_logo_icon">
+          <img src="./asset/mnuri_logo3.svg" alt="문화누리카드" class="header_logo_icon">
         </a>
         <div class="header_menu_top_left">
           <a href="#" class="header_menu_home_link" aria-label="홈으로 이동">
@@ -90,8 +90,8 @@
           </button>
           <div class="header_menu_group_list_wrap">
             <ul class="header_menu_group_list" id="header_menu_list_2">
-              <li><a href="#">카드발급 / 재충전</a></li>
-              <li><a href="#">잔액 / 이용내역</a></li>
+              <li><a href="#">카드발급/재충전</a></li>
+              <li><a href="#">잔액/이용내역</a></li>
               <li><a href="#">내 정보 관리</a></li>
             </ul>
           </div>
@@ -118,8 +118,8 @@
           <div class="header_menu_group_list_wrap">
             <ul class="header_menu_group_list" id="header_menu_list_4">
               <li><a href="#">공지사항</a></li>
-              <li><a href="#">블로그 / 이벤트</a></li>
-              <li><a href="#">FAQ / Q&amp;A</a></li>
+              <li><a href="#">블로그/이벤트</a></li>
+              <li><a href="#">FAQ/Q&amp;A</a></li>
               <li><a href="#">상담 이용안내</a></li>
             </ul>
           </div>
@@ -183,7 +183,11 @@
           <button type="button" class="hero_pager_btn" id="hero_prev_btn" aria-label="이전 배너 보기">
             <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
-          <p class="hero_pager_count"><strong id="hero_current_num">01</strong><span> / 03</span></p>
+          <p class="hero_pager_count">
+            <strong id="hero_current_num">01</strong>
+            <span class="hero_pager_progress_track"><span class="hero_pager_progress_bar" id="hero_pager_progress_bar"></span></span>
+            <span class="hero_pager_total">03</span>
+          </p>
           <button type="button" class="hero_pager_btn" id="hero_next_btn" aria-label="다음 배너 보기">
             <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
@@ -299,8 +303,22 @@
                       <select id="region_sido_select" class="merchant_select">
                         <option value="">시/도 선택</option>
                         <option value="seoul">서울특별시</option>
-                        <option value="gyeonggi">경기도</option>
                         <option value="busan">부산광역시</option>
+                        <option value="daegu">대구광역시</option>
+                        <option value="incheon">인천광역시</option>
+                        <option value="gwangju">광주광역시</option>
+                        <option value="daejeon">대전광역시</option>
+                        <option value="ulsan">울산광역시</option>
+                        <option value="sejong">세종특별자치시</option>
+                        <option value="gyeonggi">경기도</option>
+                        <option value="gangwon">강원특별자치도</option>
+                        <option value="chungbuk">충청북도</option>
+                        <option value="chungnam">충청남도</option>
+                        <option value="jeonbuk">전북특별자치도</option>
+                        <option value="jeonnam">전라남도</option>
+                        <option value="gyeongbuk">경상북도</option>
+                        <option value="gyeongnam">경상남도</option>
+                        <option value="jeju">제주특별자치도</option>
                       </select>
                       <span class="material-symbols-outlined merchant_select_icon" aria-hidden="true">expand_more</span>
                     </div>
@@ -397,11 +415,24 @@
                 </ul>
               </div>
 
-              <!-- 지도 (정적 이미지 플레이스홀더, PRD 5. 제외 범위) -->
+              <!-- 지도 (Kakao Maps JavaScript API, 보조 기능 — 마커/장소검색 없음) -->
               <div class="merchant_map_panel">
-                <img src="./asset/right_map.png" alt="가맹점 주변 지도 (플레이스홀더)" class="merchant_map_img">
-                <button type="button" class="merchant_map_btn merchant_map_btn_location" id="merchant_map_location_btn" aria-label="내 위치로 재설정"></button>
-                <button type="button" class="merchant_map_btn merchant_map_btn_change" id="merchant_map_change_btn" aria-label="지역 변경"></button>
+                <div id="merchant_map" class="merchant_map_img" role="img" aria-label="가맹점 주변 지도"></div>
+                <!-- 기존 right_map.png에 그려져 있던 "내 위치 | 지역 변경" UI를 HTML Overlay로 재구현 (CustomOverlay 아님, 지도 위 absolute 배치) -->
+                <div class="merchant_map_overlay_ui">
+                  <button type="button" class="merchant_map_btn merchant_map_btn_location" id="merchant_map_location_btn" aria-label="내 위치로 재설정">
+                    <span class="material-symbols-outlined merchant_map_btn_icon" aria-hidden="true">location_on</span>
+                    <span class="merchant_map_btn_label">내 위치</span>
+                  </button>
+                  <span class="merchant_map_btn_divider" aria-hidden="true"></span>
+                  <button type="button" class="merchant_map_btn merchant_map_btn_change" id="merchant_map_change_btn" aria-label="지역 변경">
+                    <span class="material-symbols-outlined merchant_map_btn_icon" aria-hidden="true">sync_alt</span>
+                    <span class="merchant_map_btn_label">지역 변경</span>
+                  </button>
+                </div>
+                <!-- Figma 실측(node 1:292 right_map): 지도 위에 그려지는 inner shadow. 지도 타일(#merchant_map)이 불투명해서
+                     merchant_map_panel에 직접 box-shadow를 주면 가려지므로, 지도 위에 얹는 투명 오버레이로 분리 -->
+                <div class="merchant_map_inner_shadow" aria-hidden="true"></div>
               </div>
             </div>
 
@@ -487,7 +518,7 @@
           <p class="promo_banner_subtit">영화, 책, 공연까지 문화누리카드로 가능해요</p>
           <p class="promo_banner_tit">오늘은 어떤 문화생활을 즐겨볼까요?</p>
         </div>
-        <img src="./asset/banner_icon.png" alt="" class="promo_banner_icon">
+        <img src="./asset/banner_icon_upscale.png" alt="" class="promo_banner_icon">
       </div>
     </section>
 
@@ -504,37 +535,43 @@
 
         <div class="how_panels">
           <div class="how_panel is_active" data-panel="visit" role="tabpanel">
-            <div class="how_steps">
-              <button type="button" class="how_step is_active" aria-pressed="true">
-                <div class="how_step_number">1</div>
-                <span class="how_step_chip">신청자</span>
-                <p class="how_step_main">주민센터 방문</p>
-                <p class="how_step_sub">신분증을 지참하고<br>가까운 주민센터를 방문합니다</p>
-              </button>
-              <button type="button" class="how_step" aria-pressed="false">
-                <div class="how_step_number">2</div>
-                <span class="how_step_chip">신청자</span>
-                <p class="how_step_main">카드신청서<br>작성/제출</p>
-                <p class="how_step_sub">현장 비치된 신청서를<br>작성 후 제출합니다</p>
-              </button>
-              <button type="button" class="how_step" aria-pressed="false">
-                <div class="how_step_number">3</div>
-                <span class="how_step_chip">주민센터</span>
-                <p class="how_step_main">발급자격 검증</p>
-                <p class="how_step_sub">소득 기준 등<br>발급 자격을 확인합니다</p>
-              </button>
-              <button type="button" class="how_step" aria-pressed="false">
-                <div class="how_step_number">4</div>
-                <span class="how_step_chip">주민센터</span>
-                <p class="how_step_main">상세정보 등록</p>
-                <p class="how_step_sub">카드 발급을 위한<br>정보를 등록합니다</p>
-              </button>
-              <button type="button" class="how_step" aria-pressed="false">
-                <div class="how_step_number">5</div>
-                <span class="how_step_chip">신청자</span>
-                <p class="how_step_main">문화누리카드<br>현장 직접 수령</p>
-                <p class="how_step_sub">발급 완료된 카드를<br>현장에서 바로 수령합니다</p>
-              </button>
+            <!-- Figma엔 없는 UX 개선 — 마우스 입력 환경에서 세로 스크롤 중 화면 고정+가로 카드 이동.
+                 how_scroll_stage/how_scroll_sticky는 터치 기기에서는 아무 효과 없는 빈 래퍼(기존 가로 드래그 스크롤 유지) -->
+            <div class="how_scroll_stage" id="how_scroll_stage">
+              <div class="how_scroll_sticky" id="how_scroll_sticky">
+                <div class="how_steps" id="how_steps">
+                  <button type="button" class="how_step is_active" aria-pressed="true">
+                    <div class="how_step_number">1</div>
+                    <span class="how_step_chip">신청자</span>
+                    <p class="how_step_main">주민센터 방문</p>
+                    <p class="how_step_sub">신분증을 지참하고<br>가까운 주민센터를 방문합니다</p>
+                  </button>
+                  <button type="button" class="how_step" aria-pressed="false">
+                    <div class="how_step_number">2</div>
+                    <span class="how_step_chip">신청자</span>
+                    <p class="how_step_main">카드신청서<br>작성/제출</p>
+                    <p class="how_step_sub">현장 비치된 신청서를<br>작성 후 제출합니다</p>
+                  </button>
+                  <button type="button" class="how_step" aria-pressed="false">
+                    <div class="how_step_number">3</div>
+                    <span class="how_step_chip">주민센터</span>
+                    <p class="how_step_main">발급자격 검증</p>
+                    <p class="how_step_sub">소득 기준 등<br>발급 자격을 확인합니다</p>
+                  </button>
+                  <button type="button" class="how_step" aria-pressed="false">
+                    <div class="how_step_number">4</div>
+                    <span class="how_step_chip">주민센터</span>
+                    <p class="how_step_main">상세정보 등록</p>
+                    <p class="how_step_sub">카드 발급을 위한<br>정보를 등록합니다</p>
+                  </button>
+                  <button type="button" class="how_step" aria-pressed="false">
+                    <div class="how_step_number">5</div>
+                    <span class="how_step_chip">신청자</span>
+                    <p class="how_step_main">문화누리카드<br>현장 직접 수령</p>
+                    <p class="how_step_sub">발급 완료된 카드를<br>현장에서 바로 수령합니다</p>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
           <div class="how_panel" data-panel="online" role="tabpanel" hidden>
@@ -695,6 +732,10 @@
     </div>
   </footer>
 
+  <!-- Kakao Maps JavaScript API -->
+  <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=048144971785371aa7cdb7c94285c723&autoload=false"></script>
+  <script src="region-data.js"></script>
+  <script src="region-coords.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
