@@ -11,8 +11,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initMerchantSection();
   initHowTabs();
   initStepCards();
-  initHowStepsScrollJack();
   initEventTabs();
+  initEventBannerMotion();
   initHelpSearch();
 });
 
@@ -239,13 +239,8 @@ function initHowTabs() {
 
 /* --------------------------------------------------------------------------
    3-1-1. Step Card Selection (Figma엔 없는 UX 개선 — 클릭한 카드만 활성화)
-   기본값은 1번 카드가 활성화된 상태로 시작(HTML의 is_active 클래스 그대로 사용).
    -------------------------------------------------------------------------- */
 function initStepCards() {
-  // 스크롤 고정 모드(마우스 입력 환경)에서는 스크롤 진행에 따라 자동 활성화되므로
-  // 클릭 활성화를 붙이지 않음. 터치 기기는 대체 수단이 없어 기존 클릭 활성화 유지.
-  if (isHowStepsScrollJackSupported()) return;
-
   const stepCards = document.querySelectorAll('.how_step');
   stepCards.forEach((card) => {
     card.addEventListener('click', () => handleStepCardClick(card));
@@ -258,137 +253,6 @@ function handleStepCardClick(cardEl) {
     const isTarget = card === cardEl;
     card.classList.toggle('is_active', isTarget);
     card.setAttribute('aria-pressed', String(isTarget));
-  });
-}
-
-/* --------------------------------------------------------------------------
-   3-1-2. How Steps Scroll-Jack (Figma엔 없는 UX 개선)
-   마우스/트랙패드(hover:hover, pointer:fine) 환경에서만 적용. 세로 스크롤 중
-   화면을 고정하고 카드를 가로로 이동시키며, 화면 중앙에 온 카드를 자동 활성화.
-   터치 기기·prefers-reduced-motion 환경은 기존 가로 드래그 스크롤+클릭 활성화 유지.
-   -------------------------------------------------------------------------- */
-function isHowStepsScrollJackSupported() {
-  return (
-    window.matchMedia('(hover: hover) and (pointer: fine)').matches &&
-    !window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  );
-}
-
-function initHowStepsScrollJack() {
-  const stage = document.getElementById('how_scroll_stage');
-  const sticky = document.getElementById('how_scroll_sticky');
-  const track = document.getElementById('how_steps');
-  if (!stage || !sticky || !track) return;
-  if (!isHowStepsScrollJackSupported()) return;
-
-  const steps = Array.from(track.querySelectorAll('.how_step'));
-  if (steps.length === 0) return;
-
-  let baseLeft = 0;
-  let maxTranslate = 0;
-  let ticking = false;
-  let scrollListenerAttached = false;
-
-  function setActiveStep(targetStep) {
-    steps.forEach((step) => {
-      const isTarget = step === targetStep;
-      step.classList.toggle('is_active', isTarget);
-      step.setAttribute('aria-pressed', String(isTarget));
-    });
-  }
-
-  function setActiveByScreenCenter() {
-    const centerX = window.innerWidth / 2;
-    let closest = steps[0];
-    let minDist = Infinity;
-    steps.forEach((step) => {
-      const rect = step.getBoundingClientRect();
-      const dist = Math.abs((rect.left + rect.right) / 2 - centerX);
-      if (dist < minDist) {
-        minDist = dist;
-        closest = step;
-      }
-    });
-    setActiveStep(closest);
-  }
-
-  function measure() {
-    sticky.classList.remove('is_pinned', 'is_done');
-    track.style.transform = 'translateX(0)';
-    baseLeft = track.getBoundingClientRect().left;
-    maxTranslate = Math.max(0, baseLeft + track.scrollWidth - window.innerWidth);
-    stage.style.height = `${window.innerHeight + maxTranslate}px`;
-    track.classList.add('is_scroll_jacked');
-    update();
-  }
-
-  function update() {
-    ticking = false;
-    const rect = stage.getBoundingClientRect();
-    const viewportH = window.innerHeight;
-
-    if (rect.top > 0) {
-      sticky.classList.remove('is_pinned', 'is_done');
-      track.style.transform = 'translateX(0)';
-      setActiveStep(steps[0]);
-      return;
-    }
-
-    if (rect.bottom <= viewportH) {
-      sticky.classList.remove('is_pinned');
-      sticky.classList.add('is_done');
-      track.style.transform = `translateX(${baseLeft - maxTranslate}px)`;
-      setActiveStep(steps[steps.length - 1]);
-      return;
-    }
-
-    sticky.classList.add('is_pinned');
-    sticky.classList.remove('is_done');
-    const progress = maxTranslate === 0 ? 0 : Math.min(1, Math.max(0, -rect.top / maxTranslate));
-    track.style.transform = `translateX(${baseLeft - progress * maxTranslate}px)`;
-    setActiveByScreenCenter();
-  }
-
-  function onScroll() {
-    if (!ticking) {
-      ticking = true;
-      requestAnimationFrame(update);
-    }
-  }
-
-  function attachScrollListener() {
-    if (scrollListenerAttached) return;
-    window.addEventListener('scroll', onScroll, { passive: true });
-    scrollListenerAttached = true;
-  }
-
-  function detachScrollListener() {
-    if (!scrollListenerAttached) return;
-    window.removeEventListener('scroll', onScroll);
-    scrollListenerAttached = false;
-  }
-
-  measure();
-
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          attachScrollListener();
-          update();
-        } else {
-          detachScrollListener();
-        }
-      });
-    },
-    { rootMargin: '200px 0px 200px 0px' }
-  );
-  observer.observe(stage);
-
-  let resizeTimer = null;
-  window.addEventListener('resize', () => {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(measure, 200);
   });
 }
 
@@ -409,6 +273,72 @@ function initEventTabs() {
       btn.setAttribute('aria-selected', 'true');
     });
   });
+}
+
+/* --------------------------------------------------------------------------
+   3-2-1. Event Banner Entrance Motion
+   -------------------------------------------------------------------------- */
+function initEventBannerMotion() {
+  const banner = document.querySelector('.event_banner');
+  if (!banner || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+  let targetOffset = 0;
+  let currentOffset = 0;
+  let lastScrollY = window.scrollY;
+  let frameId = null;
+  let isScrollListenerAttached = false;
+
+  function render() {
+    targetOffset *= 0.86;
+    currentOffset += (targetOffset - currentOffset) * 0.075;
+    banner.style.setProperty('--event_banner_lag', `${currentOffset.toFixed(2)}px`);
+
+    if (Math.abs(targetOffset) > 0.1 || Math.abs(currentOffset) > 0.1) {
+      frameId = requestAnimationFrame(render);
+      return;
+    }
+
+    banner.style.setProperty('--event_banner_lag', '0px');
+    frameId = null;
+  }
+
+  function handleScroll() {
+    const scrollDelta = window.scrollY - lastScrollY;
+    lastScrollY = window.scrollY;
+    targetOffset = clamp(targetOffset + scrollDelta * 0.12, -16, 16);
+    if (frameId === null) frameId = requestAnimationFrame(render);
+  }
+
+  function attachScrollListener() {
+    if (isScrollListenerAttached) return;
+    lastScrollY = window.scrollY;
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    isScrollListenerAttached = true;
+  }
+
+  function detachScrollListener() {
+    if (!isScrollListenerAttached) return;
+    window.removeEventListener('scroll', handleScroll);
+    isScrollListenerAttached = false;
+  }
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          banner.classList.add('is_visible');
+          attachScrollListener();
+          return;
+        }
+
+        detachScrollListener();
+      });
+    },
+    { rootMargin: '160px 0px 160px 0px', threshold: 0.15 }
+  );
+
+  observer.observe(banner);
 }
 
 /* --------------------------------------------------------------------------

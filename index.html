@@ -535,11 +535,13 @@
 
         <div class="how_panels">
           <div class="how_panel is_active" data-panel="visit" role="tabpanel">
-            <!-- Figma엔 없는 UX 개선 — 마우스 입력 환경에서 세로 스크롤 중 화면 고정+가로 카드 이동.
-                 how_scroll_stage/how_scroll_sticky는 터치 기기에서는 아무 효과 없는 빈 래퍼(기존 가로 드래그 스크롤 유지) -->
+            <!-- Figma엔 없는 UX 개선 — 마우스 입력 환경에서 카드 5개가 다 지나갈 때까지
+                 how_steps(카드 영역)만 헤더 아래에 고정되고, 그동안 트랙만 가로 이동.
+                 how_scroll_stage는 고정 구간 확보용 spacer. 터치 기기는 아무 효과 없는
+                 래퍼(기존 how_steps의 overflow-x:auto 가로 드래그 스크롤 그대로 유지) -->
             <div class="how_scroll_stage" id="how_scroll_stage">
-              <div class="how_scroll_sticky" id="how_scroll_sticky">
-                <div class="how_steps" id="how_steps">
+              <div class="how_steps" id="how_steps">
+                <div class="how_steps_track" id="how_steps_track">
                   <button type="button" class="how_step is_active" aria-pressed="true">
                     <div class="how_step_number">1</div>
                     <span class="how_step_chip">신청자</span>
